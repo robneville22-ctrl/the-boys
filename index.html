@@ -1,0 +1,3319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Brothers Arcade</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0f1117;
+      font-family: 'Outfit', system-ui, sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #e8e8ec;
+    }
+
+    /* Menu */
+    #menu { text-align: center; }
+    #menu h1 {
+      font-size: 52px;
+      font-weight: 900;
+      color: #f0f0f4;
+      letter-spacing: -2px;
+      margin-bottom: 4px;
+    }
+    #menu h1 span { color: #e53935; }
+    #menu .subtitle {
+      font-size: 16px;
+      color: #6b6b7b;
+      font-weight: 400;
+      margin-bottom: 48px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .game-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+    .game-btn {
+      background: #1a1b26;
+      color: #e8e8ec;
+      border: 1px solid #2a2b3a;
+      padding: 28px 32px;
+      font-size: 18px;
+      font-weight: 600;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      font-family: inherit;
+      width: 180px;
+      text-align: center;
+    }
+    .game-btn:hover {
+      transform: translateY(-4px);
+      border-color: #e53935;
+      box-shadow: 0 12px 32px rgba(229, 57, 53, 0.15);
+    }
+    .game-btn:active { transform: translateY(-1px) scale(0.98); }
+    .game-btn .icon {
+      font-size: 36px;
+      display: block;
+      margin-bottom: 10px;
+      line-height: 1;
+    }
+    #menu.hidden { display: none; }
+
+    /* Canvas */
+    canvas { display: none; border-radius: 16px; }
+    canvas.active { display: block; }
+
+    /* HUD bar */
+    #hud {
+      display: none;
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 17, 23, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid #2a2b3a;
+      border-radius: 14px;
+      padding: 8px 24px;
+      z-index: 10;
+      gap: 28px;
+      align-items: center;
+      font-weight: 600;
+      font-size: 15px;
+      letter-spacing: 0.5px;
+    }
+    #hud.active { display: flex; }
+    #hud .hud-item { display: flex; align-items: center; gap: 6px; }
+    #hud .hud-label { color: #6b6b7b; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+    #hud .hud-value { color: #f0f0f4; font-size: 18px; font-weight: 800; }
+    #hud .hud-value.red { color: #e53935; }
+
+    #back-btn {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      background: rgba(15, 17, 23, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid #2a2b3a;
+      color: #9b9bab;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-family: inherit;
+      cursor: pointer;
+      display: none;
+      z-index: 10;
+      transition: all 0.15s;
+    }
+    #back-btn:hover { border-color: #e53935; color: #f0f0f4; }
+    #back-btn.active { display: block; }
+
+    .instructions {
+      position: fixed;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #4a4a5a;
+      font-size: 13px;
+      display: none;
+      z-index: 10;
+      background: rgba(15, 17, 23, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid #1e1f2e;
+      padding: 6px 16px;
+      border-radius: 8px;
+      white-space: nowrap;
+    }
+    .instructions.active { display: block; }
+
+    /* Game Over */
+    #game-over {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 10, 16, 0.92);
+      backdrop-filter: blur(16px);
+      color: white;
+      z-index: 20;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    #game-over.active { display: flex; }
+    #game-over h2 {
+      font-size: 56px;
+      font-weight: 900;
+      color: #e53935;
+      letter-spacing: -2px;
+      margin-bottom: 4px;
+    }
+    #game-over .final-score { font-size: 28px; color: #9b9bab; margin-bottom: 36px; font-weight: 600; }
+    #game-over .btn-row { display: flex; gap: 12px; }
+    #game-over button {
+      background: #1a1b26;
+      color: #e8e8ec;
+      border: 1px solid #2a2b3a;
+      padding: 14px 36px;
+      font-size: 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 600;
+      transition: all 0.15s;
+    }
+    #game-over button:hover { border-color: #e53935; transform: translateY(-2px); }
+    #game-over button.primary { background: #e53935; border-color: #e53935; color: white; }
+    #game-over button.primary:hover { background: #c62828; }
+
+    /* Scoreboard */
+    #scoreboard {
+      display: none;
+      position: fixed;
+      top: 70px;
+      right: 16px;
+      background: rgba(15, 17, 23, 0.9);
+      backdrop-filter: blur(12px);
+      border: 1px solid #2a2b3a;
+      border-radius: 14px;
+      padding: 16px 20px;
+      z-index: 10;
+      min-width: 160px;
+    }
+    #scoreboard.active { display: block; }
+    #scoreboard h3 {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #6b6b7b;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+    #scoreboard .sb-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 0;
+      font-size: 14px;
+    }
+    #scoreboard .sb-row + .sb-row { border-top: 1px solid #1e1f2e; padding-top: 6px; margin-top: 2px; }
+    #scoreboard .sb-label { color: #9b9bab; }
+    #scoreboard .sb-val { font-weight: 800; color: #f0f0f4; }
+    #scoreboard .sb-val.accent { color: #e53935; }
+  </style>
+</head>
+<body>
+  <div id="menu">
+    <h1><span>THE BROTHERS</span> ARCADE</h1>
+    <div class="subtitle">Pick a sport</div>
+    <div class="game-buttons">
+      <button class="game-btn" onclick="startGame('baseball')">
+        <span class="icon">&#9918;</span>Baseball
+      </button>
+      <button class="game-btn" onclick="showFootballPicker()">
+        <span class="icon">&#127944;</span>Football
+      </button>
+      <button class="game-btn" onclick="startGame('basketball')">
+        <span class="icon">&#127936;</span>Basketball
+      </button>
+      <button class="game-btn" onclick="startGame('soccer')">
+        <span class="icon">&#9917;</span>Soccer
+      </button>
+      <button class="game-btn" onclick="showMathSetup()">
+        <span class="icon">&#129518;</span>Math
+      </button>
+      <button class="game-btn" onclick="showRunningSetup()">
+        <span class="icon">🏃</span>Running
+      </button>
+      <button class="game-btn" onclick="startGame('dodgeball')">
+        <span class="icon">🤾</span>Dodgeball
+      </button>
+      <button class="game-btn" onclick="startGame('volleyball')">
+        <span class="icon">🏐</span>Volleyball
+      </button>
+    </div>
+  </div>
+
+  <!-- Math setup: pick operation then time -->
+  <div id="math-setup" style="display:none; position:fixed; inset:0; background:rgba(10,10,16,0.95); z-index:25; flex-direction:column; align-items:center; justify-content:center; text-align:center; font-family:'Outfit',sans-serif; color:#e8e8ec;">
+    <h2 style="font-size:36px; font-weight:900; color:#e53935; margin-bottom:8px;">MATH CHALLENGE</h2>
+    <div id="math-step1">
+      <p style="color:#9b9bab; margin-bottom:20px; font-size:16px;">Pick what to practice</p>
+      <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-bottom:24px;">
+        <button class="game-btn" onclick="pickMathOp('add')" style="width:140px; padding:16px;"><span class="icon" style="font-size:28px;">&#10133;</span>Addition</button>
+        <button class="game-btn" onclick="pickMathOp('sub')" style="width:140px; padding:16px;"><span class="icon" style="font-size:28px;">&#10134;</span>Subtraction</button>
+        <button class="game-btn" onclick="pickMathOp('mul')" style="width:140px; padding:16px;"><span class="icon" style="font-size:28px;">&#10006;</span>Multiply</button>
+        <button class="game-btn" onclick="pickMathOp('div')" style="width:140px; padding:16px;"><span class="icon" style="font-size:28px;">&#10135;</span>Division</button>
+        <button class="game-btn" onclick="pickMathOp('all')" style="width:140px; padding:16px;"><span class="icon" style="font-size:28px;">&#127922;</span>All Mixed</button>
+      </div>
+    </div>
+    <div id="math-step2" style="display:none;">
+      <p style="color:#9b9bab; margin-bottom:20px; font-size:16px;">How long do you want to play?</p>
+      <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-bottom:24px;">
+        <button class="game-btn" onclick="startMath(60)" style="width:120px; padding:16px;">1 min</button>
+        <button class="game-btn" onclick="startMath(120)" style="width:120px; padding:16px;">2 min</button>
+        <button class="game-btn" onclick="startMath(300)" style="width:120px; padding:16px;">5 min</button>
+        <button class="game-btn" onclick="startMath(600)" style="width:120px; padding:16px;">10 min</button>
+      </div>
+    </div>
+    <button class="game-btn" onclick="document.getElementById('math-setup').style.display='none'; document.getElementById('math-step1').style.display=''; document.getElementById('math-step2').style.display='none';" style="padding:10px 24px; font-size:14px;">Back</button>
+  </div>
+
+  <!-- Football play picker -->
+  <div id="fb-play-picker" style="display:none; position:fixed; inset:0; background:rgba(10,10,16,0.92); z-index:25; flex-direction:column; align-items:center; justify-content:center; text-align:center; font-family:'Outfit',sans-serif; color:#e8e8ec;">
+    <h2 style="font-size:36px; font-weight:900; color:#e53935; margin-bottom:8px;">FOOTBALL</h2>
+    <p style="color:#9b9bab; margin-bottom:32px; font-size:16px;">Pick your play mode</p>
+    <div style="display:flex; gap:16px; flex-wrap:wrap; justify-content:center;">
+      <button class="game-btn" onclick="startFootballMode('pass')">
+        <span class="icon">&#127944;</span>Pass (QB)
+      </button>
+      <button class="game-btn" onclick="startFootballMode('run')">
+        <span class="icon">&#127939;</span>Run the Ball
+      </button>
+      <button class="game-btn" onclick="startFootballMode('defense')">
+        <span class="icon">&#128737;</span>Defense
+      </button>
+    </div>
+  </div>
+
+  <!-- Running distance picker -->
+  <div id="run-picker" style="display:none; position:fixed; inset:0; background:rgba(10,10,16,0.92); z-index:25; flex-direction:column; align-items:center; justify-content:center; text-align:center; font-family:'Outfit',sans-serif; color:#e8e8ec;">
+    <h2 style="font-size:36px; font-weight:900; color:#e53935; margin-bottom:8px;">TRACK RACE</h2>
+    <p style="color:#9b9bab; margin-bottom:32px; font-size:16px;">Pick your distance</p>
+    <div style="display:flex; gap:16px; flex-wrap:wrap; justify-content:center;">
+      <button class="game-btn" onclick="startRunningMode(50)">
+        <span class="icon">💨</span>50m Sprint
+      </button>
+      <button class="game-btn" onclick="startRunningMode(100)">
+        <span class="icon">🏃</span>100m Dash
+      </button>
+      <button class="game-btn" onclick="startRunningMode(150)">
+        <span class="icon">🔥</span>150m Race
+      </button>
+    </div>
+    <button class="game-btn" onclick="document.getElementById('run-picker').style.display='none';" style="margin-top:24px; padding:10px 24px; font-size:14px;">Back</button>
+  </div>
+
+  <canvas id="gameCanvas" width="800" height="500"></canvas>
+
+  <div id="hud">
+    <div class="hud-item"><span class="hud-label">Score</span><span class="hud-value red" id="score-display">0</span></div>
+    <div class="hud-item"><span class="hud-label">Time</span><span class="hud-value" id="timer-display">30</span></div>
+  </div>
+
+  <button id="back-btn" onclick="backToMenu()">Back</button>
+  <div class="instructions" id="instructions"></div>
+  <div id="scoreboard"><h3>Scoreboard</h3><div id="sb-content"></div></div>
+
+  <div id="game-over">
+    <h2>GAME OVER</h2>
+    <div class="final-score" id="final-score">Score: 0</div>
+    <div class="btn-row">
+      <button class="primary" onclick="restartGame()">Play Again</button>
+      <button onclick="backToMenu()">Menu</button>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    let currentGame = null;
+    let score = 0;
+    let timeLeft = 30;
+    let gameLoop = null;
+    let timerInterval = null;
+    let keys = {};
+
+    document.addEventListener('keydown', e => { keys[e.key] = true; if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key)) e.preventDefault(); });
+    document.addEventListener('keyup', e => { keys[e.key] = false; });
+    canvas.addEventListener('click', handleClick);
+
+    function show(id, on) { document.getElementById(id).classList.toggle('active', on); }
+
+    function startGame(game) {
+      currentGame = game;
+      score = 0;
+      timeLeft = (game === 'math') ? mathTimeLimit : 30;
+      document.getElementById('menu').classList.add('hidden');
+      canvas.classList.add('active');
+      show('hud', true); show('back-btn', true); show('instructions', true); show('game-over', false); show('scoreboard', true);
+      updateHUD();
+
+      if (game === 'baseball') initBaseball();
+      else if (game === 'football') initFootball();
+      else if (game === 'football_run') initFootballRun();
+      else if (game === 'football_defense') initFootballDefense();
+      else if (game === 'basketball') initBasketball();
+      else if (game === 'soccer') initSoccer();
+      else if (game === 'math') initMath();
+      else if (game === 'running') initRunning();
+      else if (game === 'dodgeball') initDodgeball();
+      else if (game === 'volleyball') initVolleyball();
+
+      timerInterval = setInterval(() => { timeLeft--; updateHUD(); if (timeLeft <= 0) endGame(); }, 1000);
+      gameLoop = requestAnimationFrame(update);
+    }
+
+    function updateHUD() {
+      document.getElementById('score-display').textContent = score;
+      document.getElementById('timer-display').textContent = timeLeft;
+    }
+
+    function updateScoreboard(html) {
+      document.getElementById('sb-content').innerHTML = html;
+    }
+
+    function endGame() {
+      cancelAnimationFrame(gameLoop);
+      clearInterval(timerInterval);
+      document.getElementById('final-score').textContent = `Final Score: ${score}`;
+      show('game-over', true);
+    }
+
+    function restartGame() { show('game-over', false); startGame(currentGame); }
+
+    function backToMenu() {
+      cancelAnimationFrame(gameLoop);
+      clearInterval(timerInterval);
+      canvas.classList.remove('active');
+      show('hud', false); show('back-btn', false); show('instructions', false); show('game-over', false); show('scoreboard', false);
+      document.getElementById('menu').classList.remove('hidden');
+      currentGame = null;
+    }
+
+    function update() {
+      if (currentGame === 'baseball') updateBaseball();
+      else if (currentGame === 'football') updateFootball();
+      else if (currentGame === 'football_run') updateFootballRun();
+      else if (currentGame === 'football_defense') updateFootballDefense();
+      else if (currentGame === 'basketball') updateBasketball();
+      else if (currentGame === 'soccer') updateSoccer();
+      else if (currentGame === 'math') updateMath();
+      else if (currentGame === 'running') updateRunning();
+      else if (currentGame === 'dodgeball') updateDodgeball();
+      else if (currentGame === 'volleyball') updateVolleyball();
+      gameLoop = requestAnimationFrame(update);
+    }
+
+    function handleClick(e) {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      if (currentGame === 'baseball') clickBaseball(x, y);
+      if (currentGame === 'basketball') clickBasketball(x, y);
+      if (currentGame === 'football') clickFootball(x, y);
+      if (currentGame === 'football_defense') clickFootballDefense(x, y);
+      if (currentGame === 'soccer') clickSoccer(x, y);
+      if (currentGame === 'math') clickMath(x, y);
+      if (currentGame === 'running') clickRunning(x, y);
+      if (currentGame === 'dodgeball') clickDodgeball(x, y);
+      if (currentGame === 'volleyball') clickVolleyball(x, y);
+    }
+
+    // ---- DRAWING HELPERS ----
+
+    function drawPlayer(x, y, color, facing) {
+      // Shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.15)';
+      ctx.beginPath();
+      ctx.ellipse(x, y + 34, 12, 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Shoes
+      ctx.fillStyle = '#2a2a2a';
+      ctx.fillRect(x - 10, y + 26, 8, 6);
+      ctx.fillRect(x + 2, y + 26, 8, 6);
+      // Legs
+      ctx.fillStyle = '#e8e8ec';
+      ctx.fillRect(x - 8, y + 14, 6, 14);
+      ctx.fillRect(x + 2, y + 14, 6, 14);
+      // Body
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.roundRect(x - 12, y - 16, 24, 32, 6);
+      ctx.fill();
+      // Jersey number
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.font = 'bold 11px Outfit';
+      ctx.textAlign = 'center';
+      ctx.fillText('G', x, y + 4);
+      // Head
+      ctx.fillStyle = '#f5cba7';
+      ctx.beginPath();
+      ctx.arc(x, y - 26, 12, 0, Math.PI * 2);
+      ctx.fill();
+      // Hair
+      ctx.fillStyle = '#5c3d2e';
+      ctx.beginPath();
+      ctx.arc(x, y - 30, 12, Math.PI, Math.PI * 2);
+      ctx.fill();
+      // Eyes
+      ctx.fillStyle = '#1a1a2e';
+      ctx.fillRect(x - 4, y - 28, 2, 2);
+      ctx.fillRect(x + 3, y - 28, 2, 2);
+    }
+
+    function drawDefender(x, y, color) {
+      ctx.fillStyle = 'rgba(0,0,0,0.15)';
+      ctx.beginPath();
+      ctx.ellipse(x, y + 34, 12, 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#2a2a2a';
+      ctx.fillRect(x - 10, y + 26, 8, 6);
+      ctx.fillRect(x + 2, y + 26, 8, 6);
+      ctx.fillStyle = '#ddd';
+      ctx.fillRect(x - 8, y + 14, 6, 14);
+      ctx.fillRect(x + 2, y + 14, 6, 14);
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.roundRect(x - 12, y - 16, 24, 32, 6);
+      ctx.fill();
+      ctx.fillStyle = '#f0d0a0';
+      ctx.beginPath();
+      ctx.arc(x, y - 26, 12, 0, Math.PI * 2);
+      ctx.fill();
+      // Helmet for football
+      if (currentGame === 'football') {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(x, y - 28, 14, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#ddd';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(x + 8, y - 28, 6, -0.5, 0.5);
+        ctx.stroke();
+      } else {
+        ctx.fillStyle = '#3a3a3a';
+        ctx.beginPath();
+        ctx.arc(x, y - 30, 12, Math.PI, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.fillStyle = '#1a1a2e';
+      ctx.fillRect(x - 4, y - 28, 2, 2);
+      ctx.fillRect(x + 3, y - 28, 2, 2);
+    }
+
+    function drawMessage(text, color, y) {
+      ctx.save();
+      ctx.font = '900 44px Outfit';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = 'rgba(0,0,0,0.3)';
+      ctx.fillText(text, 401, y + 2);
+      ctx.fillStyle = color;
+      ctx.fillText(text, 400, y);
+      ctx.restore();
+    }
+
+    // ============================================================
+    // BASEBALL
+    // ============================================================
+    let bb = {};
+    function initBaseball() {
+      document.getElementById('instructions').textContent = 'Click to swing when the ball is near the plate!';
+      bb = {
+        ball: null, swinging: false, swingTimer: 0, swingAngle: 0,
+        hits: [], outs: 0, singles: 0, doubles: 0, homeRuns: 0,
+        strikes: 0, atBats: 0,
+        message: '', messageTimer: 0, messageColor: '#e53935',
+        pitchDelay: 0,
+      };
+      throwPitch();
+    }
+
+    function throwPitch() {
+      bb.strikes = 0;
+      bb.atBats++;
+      bb.ball = {
+        x: 150, y: 240 + Math.random() * 40 - 20,
+        speed: 3.5 + Math.random() * 2.5,
+        curve: (Math.random() - 0.5) * 0.8,
+        active: true, thrown: true,
+      };
+      bb.pitchDelay = 0;
+    }
+
+    function clickBaseball() {
+      if (bb.swinging || bb.outs >= 3) return;
+      bb.swinging = true;
+      bb.swingTimer = 14;
+      bb.swingAngle = 0;
+
+      if (bb.ball && bb.ball.active) {
+        const plateX = 580;
+        const dist = Math.abs(bb.ball.x - plateX);
+        if (dist < 55) {
+          const pts = dist < 15 ? 4 : dist < 30 ? 2 : 1;
+          if (pts === 4) { score += 4; bb.homeRuns++; bb.message = 'HOME RUN!'; bb.messageColor = '#ffd54f'; }
+          else if (pts === 2) { score += 2; bb.doubles++; bb.message = 'DOUBLE!'; bb.messageColor = '#66bb6a'; }
+          else { score += 1; bb.singles++; bb.message = 'SINGLE!'; bb.messageColor = '#42a5f5'; }
+          bb.messageTimer = 50;
+          bb.hits.push({ x: bb.ball.x, y: bb.ball.y, vx: -7 - Math.random() * 8, vy: -8 - Math.random() * 5, life: 70 });
+          bb.ball.active = false;
+          updateHUD();
+        } else {
+          bb.strikes++;
+          if (bb.strikes >= 3) {
+            bb.outs++;
+            bb.message = 'STRIKEOUT!';
+            bb.messageColor = '#e53935';
+            bb.messageTimer = 45;
+            bb.ball.active = false;
+            if (bb.outs >= 3) {
+              bb.message = '3 OUTS!';
+              bb.messageTimer = 60;
+              setTimeout(endGame, 1500);
+              return;
+            }
+          } else {
+            bb.message = 'STRIKE ' + bb.strikes + '!';
+            bb.messageColor = '#ef5350';
+            bb.messageTimer = 30;
+          }
+        }
+      }
+    }
+
+    function updateBaseball() {
+      // Sky gradient
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, 220);
+      skyGrad.addColorStop(0, '#1e3a5f');
+      skyGrad.addColorStop(1, '#4a90d9');
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(0, 0, 800, 220);
+
+      // Clouds
+      ctx.fillStyle = 'rgba(255,255,255,0.12)';
+      [[100,60,50], [300,40,40], [600,70,55], [500,30,35]].forEach(([cx,cy,r]) => {
+        ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(cx + r * 0.7, cy - 5, r * 0.7, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(cx - r * 0.5, cy + 3, r * 0.6, 0, Math.PI * 2); ctx.fill();
+      });
+
+      // Field gradient
+      const fieldGrad = ctx.createLinearGradient(0, 200, 0, 500);
+      fieldGrad.addColorStop(0, '#3d8b37');
+      fieldGrad.addColorStop(1, '#2d6a27');
+      ctx.fillStyle = fieldGrad;
+      ctx.fillRect(0, 200, 800, 300);
+
+      // Grass stripes
+      for (let i = 0; i < 8; i++) {
+        ctx.fillStyle = i % 2 === 0 ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)';
+        ctx.fillRect(0, 200 + i * 38, 800, 38);
+      }
+
+      // Infield dirt
+      ctx.fillStyle = '#b8956a';
+      ctx.beginPath();
+      ctx.moveTo(400, 180);
+      ctx.lineTo(620, 350);
+      ctx.lineTo(400, 470);
+      ctx.lineTo(180, 350);
+      ctx.closePath();
+      ctx.fill();
+
+      // Dirt texture
+      ctx.fillStyle = '#a88458';
+      ctx.beginPath();
+      ctx.moveTo(400, 195);
+      ctx.lineTo(605, 350);
+      ctx.lineTo(400, 455);
+      ctx.lineTo(195, 350);
+      ctx.closePath();
+      ctx.fill();
+
+      // Baselines
+      ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(400, 190); ctx.lineTo(615, 345);
+      ctx.moveTo(400, 190); ctx.lineTo(185, 345);
+      ctx.stroke();
+
+      // Bases
+      ctx.fillStyle = '#fff';
+      [[400, 185], [610, 340], [400, 460], [190, 340]].forEach(([bx, by], i) => {
+        ctx.save();
+        ctx.translate(bx, by);
+        ctx.rotate(Math.PI / 4);
+        ctx.fillRect(-7, -7, 14, 14);
+        ctx.restore();
+      });
+
+      // Pitcher mound
+      ctx.fillStyle = '#c4956a';
+      ctx.beginPath();
+      ctx.ellipse(400, 300, 22, 10, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ddd';
+      ctx.fillRect(395, 297, 10, 3);
+
+      // Pitcher
+      drawDefender(370, 270, '#2255aa');
+
+      // Infielders
+      // First baseman (near 1st base)
+      drawDefender(555, 320, '#2255aa');
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.font = '600 9px Outfit';
+      ctx.textAlign = 'center';
+      ctx.fillText('1B', 555, 280);
+
+      // Second baseman (between 1st and 2nd)
+      drawDefender(475, 255, '#2255aa');
+      ctx.fillText('2B', 475, 215);
+
+      // Shortstop (between 2nd and 3rd)
+      drawDefender(315, 255, '#2255aa');
+      ctx.fillText('SS', 315, 215);
+
+      // Third baseman (near 3rd base)
+      drawDefender(235, 320, '#2255aa');
+      ctx.fillText('3B', 235, 280);
+
+      // Home plate area
+      ctx.fillStyle = '#c4956a';
+      ctx.beginPath();
+      ctx.ellipse(590, 355, 30, 14, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Batter (Grayson)
+      drawPlayer(600, 320, '#e53935');
+
+      // Bat
+      ctx.save();
+      ctx.translate(614, 310);
+      const swAng = bb.swinging ? Math.min(bb.swingAngle, 2.2) : -0.6;
+      ctx.rotate(-1 + swAng);
+      ctx.fillStyle = '#deb887';
+      ctx.beginPath();
+      ctx.roundRect(0, -3, 48, 6, 2);
+      ctx.fill();
+      ctx.fillStyle = '#c4a06a';
+      ctx.fillRect(44, -5, 8, 10);
+      ctx.restore();
+
+      if (bb.swinging) {
+        bb.swingAngle += 0.35;
+        bb.swingTimer--;
+        if (bb.swingTimer <= 0) { bb.swinging = false; bb.swingAngle = 0; }
+      }
+
+      // Ball
+      if (bb.ball && bb.ball.active) {
+        bb.ball.x += bb.ball.speed;
+        bb.ball.y += bb.ball.curve;
+
+        // Ball shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.15)';
+        ctx.beginPath();
+        ctx.ellipse(bb.ball.x, 370, 6, 3, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Ball
+        ctx.fillStyle = '#f5f5f5';
+        ctx.beginPath();
+        ctx.arc(bb.ball.x, bb.ball.y, 7, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#cc3333';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(bb.ball.x, bb.ball.y, 5, 0.5, 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(bb.ball.x, bb.ball.y, 5, 3.5, 5);
+        ctx.stroke();
+
+        // Ball passes plate
+        if (bb.ball.x > 680) {
+          bb.ball.active = false;
+          if (!bb.swinging) {
+            bb.strikes++;
+            if (bb.strikes >= 3) {
+              bb.outs++;
+              bb.message = 'CALLED STRIKE 3!';
+              bb.messageColor = '#e53935';
+              bb.messageTimer = 45;
+              if (bb.outs >= 3) {
+                bb.message = '3 OUTS - GAME OVER!';
+                bb.messageTimer = 60;
+                setTimeout(endGame, 1500);
+                return;
+              }
+            } else {
+              bb.message = 'STRIKE ' + bb.strikes;
+              bb.messageColor = '#ef5350';
+              bb.messageTimer = 25;
+            }
+          }
+        }
+      }
+
+      // New pitch after delay
+      if (bb.ball && !bb.ball.active && bb.outs < 3) {
+        bb.pitchDelay++;
+        if (bb.pitchDelay > 70) throwPitch();
+      }
+
+      // Flying hit balls
+      bb.hits.forEach(h => {
+        h.x += h.vx; h.y += h.vy; h.vy += 0.18; h.life--;
+        ctx.fillStyle = `rgba(245,245,245,${h.life / 70})`;
+        ctx.beginPath();
+        ctx.arc(h.x, h.y, 5, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      bb.hits = bb.hits.filter(h => h.life > 0);
+
+      // Outs display (circles at bottom-left of field)
+      ctx.fillStyle = 'rgba(0,0,0,0.3)';
+      ctx.beginPath();
+      ctx.roundRect(14, 460, 90, 30, 8);
+      ctx.fill();
+      for (let i = 0; i < 3; i++) {
+        ctx.fillStyle = i < bb.outs ? '#e53935' : 'rgba(255,255,255,0.2)';
+        ctx.beginPath();
+        ctx.arc(32 + i * 24, 475, 8, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Strike count on canvas
+      ctx.fillStyle = 'rgba(0,0,0,0.3)';
+      ctx.beginPath();
+      ctx.roundRect(14, 425, 90, 30, 8);
+      ctx.fill();
+      ctx.fillStyle = '#9b9bab';
+      ctx.font = '600 11px Outfit';
+      ctx.textAlign = 'left';
+      ctx.fillText('STRIKES', 22, 438);
+      for (let i = 0; i < 3; i++) {
+        ctx.fillStyle = i < bb.strikes ? '#ffd54f' : 'rgba(255,255,255,0.2)';
+        ctx.beginPath();
+        ctx.arc(32 + i * 24, 448, 5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Message
+      if (bb.messageTimer > 0) {
+        bb.messageTimer--;
+        drawMessage(bb.message, bb.messageColor, 140);
+      }
+
+      // Scoreboard
+      updateScoreboard(`
+        <div class="sb-row"><span class="sb-label">At Bats</span><span class="sb-val">${bb.atBats}</span></div>
+        <div class="sb-row"><span class="sb-label">Singles</span><span class="sb-val">${bb.singles}</span></div>
+        <div class="sb-row"><span class="sb-label">Doubles</span><span class="sb-val">${bb.doubles}</span></div>
+        <div class="sb-row"><span class="sb-label">Home Runs</span><span class="sb-val accent">${bb.homeRuns}</span></div>
+        <div class="sb-row"><span class="sb-label">Outs</span><span class="sb-val">${bb.outs} / 3</span></div>
+      `);
+    }
+
+    // ============================================================
+    // FOOTBALL — QB mode: throw to receivers!
+    // ============================================================
+    let fb = {};
+
+    function initFootball() {
+      document.getElementById('instructions').textContent = 'Arrow keys to move. Click a receiver to throw them the ball!';
+      fb = {
+        player: { x: 120, y: 250, speed: 3.5 },
+        receivers: [],
+        defenders: [],
+        oLine: [], // offensive linemen
+        ball: null, // { x, y, vx, vy, targetReceiver }
+        touchdowns: 0, completions: 0, interceptions: 0, incompletions: 0,
+        plays: 0,
+        message: '', messageTimer: 0, messageColor: '#66bb6a',
+        resetTimer: 0,
+      };
+      setupPlay();
+    }
+
+    function setupPlay() {
+      fb.plays++;
+      fb.ball = null;
+      fb.player.x = 120;
+      fb.player.y = 250;
+      // 3 receivers running routes
+      fb.receivers = [
+        { x: 120, y: 100, targetX: 550 + Math.random()*150, targetY: 80 + Math.random()*60, speed: 2.8 + Math.random(), caught: false, running: true, label: 'WR1' },
+        { x: 120, y: 250, targetX: 500 + Math.random()*150, targetY: 220 + Math.random()*60, speed: 2.5 + Math.random(), caught: false, running: true, label: 'WR2' },
+        { x: 120, y: 400, targetX: 450 + Math.random()*150, targetY: 380 + Math.random()*60, speed: 2.6 + Math.random(), caught: false, running: true, label: 'RB' },
+      ];
+      // Offensive linemen (5 big blockers protecting the QB)
+      fb.oLine = [
+        { x: 160, y: 170, targetY: 170 },
+        { x: 165, y: 210, targetY: 210 },
+        { x: 170, y: 250, targetY: 250 },
+        { x: 165, y: 290, targetY: 290 },
+        { x: 160, y: 330, targetY: 330 },
+      ];
+      // Defenders covering receivers + 1 pass rusher
+      fb.defenders = [
+        { x: 300, y: fb.receivers[0].targetY, targetR: 0, vy: 0, rusher: false },
+        { x: 320, y: fb.receivers[1].targetY, targetR: 1, vy: 0, rusher: false },
+        { x: 280, y: fb.receivers[2].targetY, targetR: 2, vy: 0, rusher: false },
+        { x: 250, y: 250, targetR: -1, vy: 0, rusher: true, rushSpeed: 1.8 + fb.touchdowns * 0.3 },
+      ];
+      fb.resetTimer = 0;
+    }
+
+    function clickFootball(mx, my) {
+      if (fb.ball !== null) return; // Already threw
+      // Find closest receiver to click
+      let closest = null;
+      let closestDist = Infinity;
+      fb.receivers.forEach((r, i) => {
+        const d = Math.sqrt((mx - r.x) ** 2 + (my - r.y) ** 2);
+        if (d < closestDist) { closestDist = d; closest = i; }
+      });
+      if (closest !== null && closestDist < 120) {
+        const r = fb.receivers[closest];
+        // Lead the receiver a bit
+        const leadX = r.running ? r.x + (r.targetX - r.x) * 0.4 : r.x;
+        const leadY = r.running ? r.y + (r.targetY - r.y) * 0.4 : r.y;
+        const dx = leadX - fb.player.x;
+        const dy = leadY - fb.player.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        fb.ball = {
+          x: fb.player.x, y: fb.player.y - 10,
+          vx: (dx / dist) * 8,
+          vy: (dy / dist) * 8,
+          target: closest,
+          life: 80,
+        };
+      }
+    }
+
+    function drawFootballField() {
+      const fGrad = ctx.createLinearGradient(0, 0, 0, 500);
+      fGrad.addColorStop(0, '#2d7a2d');
+      fGrad.addColorStop(1, '#1d5a1d');
+      ctx.fillStyle = fGrad;
+      ctx.fillRect(0, 0, 800, 500);
+      for (let i = 0; i < 12; i++) {
+        ctx.fillStyle = i % 2 === 0 ? 'rgba(255,255,255,0.025)' : 'rgba(0,0,0,0.025)';
+        ctx.fillRect(i * 67, 0, 67, 500);
+      }
+      for (let i = 0; i < 11; i++) {
+        const lx = 40 + i * 72;
+        ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(lx, 45); ctx.lineTo(lx, 460); ctx.stroke();
+        if (i > 0 && i < 10) {
+          ctx.fillStyle = 'rgba(255,255,255,0.25)';
+          ctx.font = '600 12px Outfit';
+          ctx.textAlign = 'center';
+          ctx.fillText(`${i * 10}`, lx, 38);
+        }
+        ctx.fillStyle = 'rgba(255,255,255,0.15)';
+        ctx.fillRect(lx - 1, 150, 2, 6);
+        ctx.fillRect(lx - 1, 340, 2, 6);
+      }
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.fillRect(0, 43, 800, 2);
+      ctx.fillRect(0, 458, 800, 2);
+      // End zone
+      ctx.fillStyle = 'rgba(66, 133, 244, 0.25)';
+      ctx.fillRect(762, 45, 38, 413);
+      ctx.save();
+      ctx.translate(778, 260);
+      ctx.rotate(-Math.PI / 2);
+      ctx.font = '900 14px Outfit';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.fillText('TOUCHDOWN', 0, 5);
+      ctx.restore();
+      // Line of scrimmage
+      ctx.strokeStyle = 'rgba(255,255,100,0.3)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 6]);
+      ctx.beginPath(); ctx.moveTo(140, 45); ctx.lineTo(140, 460); ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    function drawHelmet(x, y, color) {
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(x, y - 28, 14, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#ddd';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(x + 8, y - 28, 6, -0.5, 0.5);
+      ctx.stroke();
+    }
+
+    function drawFootballInHand(x, y) {
+      ctx.fillStyle = '#8B4513';
+      ctx.beginPath();
+      ctx.ellipse(x + 18, y - 8, 9, 5, 0.3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(x + 14, y - 8); ctx.lineTo(x + 22, y - 8);
+      ctx.stroke();
+    }
+
+    function updateFootball() {
+      const p = fb.player;
+
+      // QB movement (only before throwing)
+      if (!fb.ball) {
+        if (keys['ArrowUp'] || keys['w']) p.y -= p.speed;
+        if (keys['ArrowDown'] || keys['s']) p.y += p.speed;
+        if (keys['ArrowLeft'] || keys['a']) p.x -= p.speed;
+        if (keys['ArrowRight'] || keys['d']) p.x += p.speed;
+        p.x = Math.max(10, Math.min(200, p.x));
+        p.y = Math.max(60, Math.min(440, p.y));
+      }
+
+      drawFootballField();
+
+      // Route lines (show where receivers are going)
+      if (!fb.ball) {
+        fb.receivers.forEach(r => {
+          ctx.strokeStyle = 'rgba(229, 57, 53, 0.2)';
+          ctx.lineWidth = 2;
+          ctx.setLineDash([4, 4]);
+          ctx.beginPath(); ctx.moveTo(r.x, r.y); ctx.lineTo(r.targetX, r.targetY); ctx.stroke();
+          ctx.setLineDash([]);
+        });
+      }
+
+      // Update receivers
+      fb.receivers.forEach(r => {
+        if (r.running && !r.caught) {
+          const dx = r.targetX - r.x;
+          const dy = r.targetY - r.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist > 3) {
+            r.x += (dx / dist) * r.speed;
+            r.y += (dy / dist) * r.speed;
+          } else {
+            r.running = false;
+            // Juke around at the spot
+          }
+        }
+        if (!r.running && !r.caught) {
+          // Small movement at the spot
+          r.y += Math.sin(Date.now() / 300 + fb.receivers.indexOf(r)) * 0.8;
+        }
+        // If caught, run to end zone
+        if (r.caught) {
+          r.x += 4;
+          if (r.x > 770) {
+            score += 7;
+            fb.touchdowns++;
+            fb.message = 'TOUCHDOWN!';
+            fb.messageColor = '#ffd54f';
+            fb.messageTimer = 50;
+            updateHUD();
+            fb.resetTimer = 60;
+            r.caught = false;
+          }
+        }
+
+        // Draw receiver
+        drawPlayer(r.x, r.y, '#e53935');
+        drawHelmet(r.x, r.y, '#e53935');
+
+        // Label
+        if (!fb.ball && !r.caught) {
+          ctx.fillStyle = 'rgba(255,255,255,0.6)';
+          ctx.font = '600 10px Outfit';
+          ctx.textAlign = 'center';
+          ctx.fillText(r.label, r.x, r.y - 46);
+        }
+
+        // Catch indicator (glow if open)
+        if (!fb.ball && !r.caught) {
+          const nearestDef = fb.defenders.filter(d => !d.rusher).reduce((best, d) => {
+            const dd = Math.sqrt((d.x - r.x) ** 2 + (d.y - r.y) ** 2);
+            return dd < best ? dd : best;
+          }, Infinity);
+          if (nearestDef > 60) {
+            ctx.strokeStyle = 'rgba(100, 255, 100, 0.4)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(r.x, r.y, 20, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+        }
+      });
+
+      // Update & draw offensive linemen
+      fb.oLine.forEach(ol => {
+        // Linemen hold their position but push toward any nearby rusher
+        fb.defenders.forEach(d => {
+          if (d.rusher) {
+            const dx = d.x - ol.x;
+            const dy = d.y - ol.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 50) {
+              // Push toward the rusher to block
+              ol.x += (dx / dist) * 0.4;
+              ol.y += (dy / dist) * 0.3;
+            }
+          }
+        });
+        // Drift back toward their starting spot so they don't wander too far
+        ol.x += (165 - ol.x) * 0.02;
+        ol.y += (ol.targetY - ol.y) * 0.03;
+
+        // Draw lineman (bigger body)
+        ctx.fillStyle = 'rgba(0,0,0,0.15)';
+        ctx.beginPath();
+        ctx.ellipse(ol.x, ol.y + 34, 14, 5, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#2a2a2a';
+        ctx.fillRect(ol.x - 12, ol.y + 26, 10, 6);
+        ctx.fillRect(ol.x + 2, ol.y + 26, 10, 6);
+        ctx.fillStyle = '#e8e8ec';
+        ctx.fillRect(ol.x - 10, ol.y + 14, 8, 14);
+        ctx.fillRect(ol.x + 2, ol.y + 14, 8, 14);
+        ctx.fillStyle = '#e53935';
+        ctx.beginPath();
+        ctx.roundRect(ol.x - 15, ol.y - 18, 30, 36, 6);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.3)';
+        ctx.font = 'bold 10px Outfit';
+        ctx.textAlign = 'center';
+        ctx.fillText('OL', ol.x, ol.y + 4);
+        drawHelmet(ol.x, ol.y, '#e53935');
+      });
+
+      // Update defenders
+      fb.defenders.forEach(d => {
+        if (d.rusher) {
+          // Rush the QB, but get slowed by O-line
+          let blocked = false;
+          fb.oLine.forEach(ol => {
+            const bx = d.x - ol.x;
+            const by = d.y - ol.y;
+            const bDist = Math.sqrt(bx * bx + by * by);
+            if (bDist < 35) {
+              // Blocked! Push the rusher back
+              d.x += (bx / bDist) * 0.5;
+              d.y += (by / bDist) * 0.3;
+              blocked = true;
+            }
+          });
+
+          const dx = p.x - d.x;
+          const dy = p.y - d.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const effectiveSpeed = blocked ? d.rushSpeed * 0.3 : d.rushSpeed;
+          if (dist > 5) {
+            d.x += (dx / dist) * effectiveSpeed;
+            d.y += (dy / dist) * effectiveSpeed;
+          }
+          // Sack check
+          if (dist < 22 && !fb.ball) {
+            fb.message = 'SACKED!';
+            fb.messageColor = '#e53935';
+            fb.messageTimer = 45;
+            fb.resetTimer = 60;
+          }
+        } else {
+          // Cover assigned receiver
+          const r = fb.receivers[d.targetR];
+          if (r) {
+            d.x += (r.x + 15 - d.x) * 0.03;
+            d.y += (r.y - d.y) * 0.04;
+          }
+        }
+        drawDefender(d.x, d.y, '#2255aa');
+        drawHelmet(d.x, d.y, '#2255aa');
+      });
+
+      // QB (Grayson)
+      drawPlayer(p.x, p.y, '#e53935');
+      drawHelmet(p.x, p.y, '#e53935');
+      if (!fb.ball) drawFootballInHand(p.x, p.y);
+
+      // Ball in air
+      if (fb.ball) {
+        const b = fb.ball;
+        b.x += b.vx;
+        b.y += b.vy;
+        b.life--;
+
+        // Draw ball
+        ctx.fillStyle = '#8B4513';
+        ctx.beginPath();
+        ctx.ellipse(b.x, b.y, 8, 5, Math.atan2(b.vy, b.vx), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(b.x - 3, b.y); ctx.lineTo(b.x + 3, b.y);
+        ctx.stroke();
+
+        // Ball shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.1)';
+        ctx.beginPath();
+        ctx.ellipse(b.x, 470, 6, 3, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Check catch by target receiver
+        const tr = fb.receivers[b.target];
+        if (tr && Math.abs(b.x - tr.x) < 25 && Math.abs(b.y - tr.y) < 25) {
+          tr.caught = true;
+          tr.running = false;
+          fb.completions++;
+          fb.message = 'CATCH!';
+          fb.messageColor = '#66bb6a';
+          fb.messageTimer = 30;
+          fb.ball = null;
+        }
+
+        // Check interception by defenders
+        if (fb.ball) {
+          fb.defenders.forEach(d => {
+            if (!d.rusher && Math.abs(b.x - d.x) < 20 && Math.abs(b.y - d.y) < 20) {
+              fb.interceptions++;
+              fb.message = 'INTERCEPTED!';
+              fb.messageColor = '#e53935';
+              fb.messageTimer = 50;
+              fb.ball = null;
+              fb.resetTimer = 60;
+            }
+          });
+        }
+
+        // Ball expired (incomplete)
+        if (fb.ball && (b.life <= 0 || b.x > 810 || b.y < 0 || b.y > 510)) {
+          fb.incompletions++;
+          fb.message = 'INCOMPLETE';
+          fb.messageColor = '#ef5350';
+          fb.messageTimer = 35;
+          fb.ball = null;
+          fb.resetTimer = 60;
+        }
+      }
+
+      // Reset for next play
+      if (fb.resetTimer > 0) {
+        fb.resetTimer--;
+        if (fb.resetTimer === 0 && !fb.receivers.some(r => r.caught)) {
+          setupPlay();
+        }
+      }
+
+      // Message
+      if (fb.messageTimer > 0) {
+        fb.messageTimer--;
+        drawMessage(fb.message, fb.messageColor, 100);
+      }
+
+      const attempts = fb.completions + fb.incompletions + fb.interceptions;
+      const pct = attempts > 0 ? Math.round(fb.completions / attempts * 100) : 0;
+      updateScoreboard(`
+        <div class="sb-row"><span class="sb-label">Touchdowns</span><span class="sb-val accent">${fb.touchdowns}</span></div>
+        <div class="sb-row"><span class="sb-label">Completions</span><span class="sb-val">${fb.completions}</span></div>
+        <div class="sb-row"><span class="sb-label">Incomplete</span><span class="sb-val">${fb.incompletions}</span></div>
+        <div class="sb-row"><span class="sb-label">INTs</span><span class="sb-val">${fb.interceptions}</span></div>
+        <div class="sb-row"><span class="sb-label">Comp %</span><span class="sb-val">${pct}%</span></div>
+      `);
+    }
+
+    // ============================================================
+    // BASKETBALL
+    // ============================================================
+    let bk = {};
+    function initBasketball() {
+      document.getElementById('instructions').textContent = 'Arrow keys to move. Click once to start meter, click again to shoot!';
+      bk = {
+        player: { x: 400, y: 380, speed: 4 },
+        ball: null, hoopX: 700, hoopY: 170,
+        made: 0, missed: 0, threes: 0,
+        defenders: [
+          { x: 500, y: 350, vy: 2.2, vx: 0 },
+          { x: 600, y: 220, vy: -1.8, vx: 0 },
+          { x: 550, y: 300, vy: 1.5, vx: 0 },
+        ],
+        teammates: [
+          { x: 300, y: 200, vx: 1.2, vy: 0.8, label: '#2' },
+          { x: 200, y: 350, vx: -0.8, vy: 1.5, label: '#3' },
+          { x: 500, y: 420, vx: 1.0, vy: -1.0, label: '#4' },
+        ],
+        meter: { active: false, power: 0, dir: 1 }, // shot meter
+        message: '', messageTimer: 0, messageColor: '#66bb6a',
+        trail: [],
+      };
+    }
+
+    function clickBasketball() {
+      if (bk.ball !== null) return;
+      const p = bk.player;
+      // First click starts meter, second click shoots
+      if (!bk.meter.active) {
+        bk.meter.active = true;
+        bk.meter.power = 0;
+        bk.meter.dir = 1;
+        return;
+      }
+      // Shoot with meter power
+      bk.meter.active = false;
+      const dx = bk.hoopX - p.x;
+      const dy = bk.hoopY - p.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      // Sweet spot is 70-90% on the meter — closer to that = more accurate
+      const meterPct = bk.meter.power / 100;
+      const sweetSpot = Math.abs(meterPct - 0.8); // 0.8 is the sweet spot
+      const accuracy = 1 - sweetSpot * 1.5; // higher = more accurate
+      const power = Math.min(dist / 22, 15) * (0.7 + meterPct * 0.6);
+      // Add some randomness based on how far from sweet spot
+      const wobble = sweetSpot * 4;
+      bk.ball = {
+        x: p.x, y: p.y - 25,
+        vx: (dx / dist) * power + (Math.random() - 0.5) * wobble,
+        vy: (dy / dist) * power - 5 + (Math.random() - 0.5) * wobble,
+        life: 100,
+        fromDist: dist,
+      };
+    }
+
+    function updateBasketball() {
+      const p = bk.player;
+      if (keys['ArrowLeft'] || keys['a']) p.x -= p.speed;
+      if (keys['ArrowRight'] || keys['d']) p.x += p.speed;
+      if (keys['ArrowUp'] || keys['w']) p.y -= p.speed;
+      if (keys['ArrowDown'] || keys['s']) p.y += p.speed;
+      p.x = Math.max(30, Math.min(770, p.x));
+      p.y = Math.max(180, Math.min(440, p.y));
+
+      // Court
+      ctx.fillStyle = '#b87333';
+      ctx.fillRect(0, 0, 800, 500);
+
+      // Wood grain
+      for (let i = 0; i < 20; i++) {
+        ctx.fillStyle = i % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)';
+        ctx.fillRect(i * 40, 0, 40, 500);
+      }
+      for (let i = 0; i < 50; i++) {
+        ctx.fillStyle = 'rgba(0,0,0,0.01)';
+        ctx.fillRect(0, i * 10, 800, 1);
+      }
+
+      // Court lines
+      ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(20, 20, 760, 460);
+      ctx.beginPath();
+      ctx.moveTo(400, 20); ctx.lineTo(400, 480);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(400, 250, 55, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Three-point arc
+      ctx.beginPath();
+      ctx.arc(780, 250, 155, Math.PI * 0.58, Math.PI * 1.42);
+      ctx.stroke();
+
+      // Key/paint
+      ctx.fillStyle = 'rgba(229, 57, 53, 0.1)';
+      ctx.fillRect(685, 165, 115, 170);
+      ctx.strokeRect(685, 165, 115, 170);
+
+      // Free throw circle
+      ctx.beginPath();
+      ctx.arc(685, 250, 45, Math.PI * 0.5, Math.PI * 1.5);
+      ctx.stroke();
+
+      // Backboard
+      ctx.fillStyle = '#ddd';
+      ctx.fillRect(752, 140, 6, 75);
+      ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(752, 140, 6, 75);
+
+      // Rim
+      ctx.strokeStyle = '#e53935';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(710, 178);
+      ctx.lineTo(750, 178);
+      ctx.stroke();
+
+      // Net
+      ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < 6; i++) {
+        ctx.beginPath();
+        ctx.moveTo(712 + i * 7, 180);
+        ctx.quadraticCurveTo(715 + i * 5, 200, 718 + i * 4, 210);
+        ctx.stroke();
+      }
+      // Net cross strings
+      ctx.beginPath();
+      ctx.moveTo(714, 192); ctx.lineTo(748, 192);
+      ctx.moveTo(716, 202); ctx.lineTo(744, 202);
+      ctx.stroke();
+
+      // Teammates (red jerseys, move around the court)
+      bk.teammates.forEach(tm => {
+        tm.x += tm.vx;
+        tm.y += tm.vy;
+        // Bounce off court boundaries
+        if (tm.x < 40 || tm.x > 740) tm.vx *= -1;
+        if (tm.y < 190 || tm.y > 440) tm.vy *= -1;
+        // Keep in bounds
+        tm.x = Math.max(40, Math.min(740, tm.x));
+        tm.y = Math.max(190, Math.min(440, tm.y));
+        // Slight random direction change
+        if (Math.random() < 0.01) { tm.vx += (Math.random() - 0.5) * 0.8; tm.vy += (Math.random() - 0.5) * 0.8; }
+        tm.vx = Math.max(-2, Math.min(2, tm.vx));
+        tm.vy = Math.max(-2, Math.min(2, tm.vy));
+
+        drawPlayer(tm.x, tm.y, '#e53935');
+        ctx.fillStyle = 'rgba(255,255,255,0.5)';
+        ctx.font = '600 9px Outfit';
+        ctx.textAlign = 'center';
+        ctx.fillText(tm.label, tm.x, tm.y - 42);
+      });
+
+      // Defenders (blue jerseys)
+      bk.defenders.forEach((def, i) => {
+        def.y += def.vy;
+        if (def.y < 200 || def.y > 420) def.vy *= -1;
+        // First defender tracks the player, others patrol zones
+        if (i === 0) {
+          def.x += (Math.min(p.x + 70, 660) - def.x) * 0.025;
+          def.y += (p.y - def.y) * 0.015;
+        } else {
+          // Zone defense — drift toward nearest teammate or player
+          const nearestTeam = bk.teammates[i - 1];
+          if (nearestTeam) {
+            def.x += (nearestTeam.x + 30 - def.x) * 0.015;
+            def.y += (nearestTeam.y - def.y) * 0.01;
+          }
+        }
+        def.x = Math.max(40, Math.min(740, def.x));
+        drawDefender(def.x, def.y, '#2255aa');
+      });
+
+      // Player (Grayson)
+      drawPlayer(p.x, p.y, '#e53935');
+
+      // Ball
+      if (bk.ball === null) {
+        // In hand
+        ctx.fillStyle = '#f58220';
+        ctx.beginPath();
+        ctx.arc(p.x + 16, p.y - 18, 9, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(p.x + 7, p.y - 18); ctx.lineTo(p.x + 25, p.y - 18);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(p.x + 16, p.y - 27); ctx.lineTo(p.x + 16, p.y - 9);
+        ctx.stroke();
+      } else {
+        const b = bk.ball;
+        b.x += b.vx; b.y += b.vy; b.vy += 0.28; b.life--;
+
+        // Trail
+        bk.trail.push({ x: b.x, y: b.y, a: 1 });
+
+        // Draw trail
+        bk.trail.forEach((t, i) => {
+          t.a -= 0.04;
+          ctx.fillStyle = `rgba(245, 130, 32, ${Math.max(0, t.a * 0.3)})`;
+          ctx.beginPath();
+          ctx.arc(t.x, t.y, 4, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        bk.trail = bk.trail.filter(t => t.a > 0);
+
+        // Ball
+        ctx.fillStyle = '#f58220';
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, 9, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Score check
+        if (b.x > 710 && b.x < 752 && b.y > 168 && b.y < 188 && b.vy > 0) {
+          const isThree = b.fromDist > 150;
+          score += isThree ? 3 : 2;
+          bk.made++;
+          if (isThree) { bk.threes++; bk.message = 'THREE!'; bk.messageColor = '#ffd54f'; }
+          else { bk.message = 'BUCKET!'; bk.messageColor = '#66bb6a'; }
+          bk.messageTimer = 40;
+          bk.ball = null;
+          bk.trail = [];
+          updateHUD();
+        }
+
+        if (b.life <= 0 || b.x > 810 || b.y > 520 || b.x < -10) {
+          if (bk.ball !== null) { bk.missed++; bk.message = 'MISS'; bk.messageColor = '#ef5350'; bk.messageTimer = 20; }
+          bk.ball = null;
+          bk.trail = [];
+        }
+      }
+
+      // Shot meter
+      if (bk.meter.active) {
+        bk.meter.power += bk.meter.dir * 2;
+        if (bk.meter.power >= 100) { bk.meter.power = 100; bk.meter.dir = -1; }
+        if (bk.meter.power <= 0) { bk.meter.power = 0; bk.meter.dir = 1; }
+
+        const mx = p.x;
+        const my = p.y - 60;
+        const mw = 50;
+        const mh = 8;
+        const fillW = (bk.meter.power / 100) * mw;
+
+        // Background
+        ctx.fillStyle = 'rgba(0,0,0,0.6)';
+        ctx.beginPath();
+        ctx.roundRect(mx - mw / 2 - 3, my - 3, mw + 6, mh + 6, 4);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.2)';
+        ctx.fillRect(mx - mw / 2, my, mw, mh);
+
+        // Sweet spot zone (70-90%)
+        ctx.fillStyle = 'rgba(100, 255, 100, 0.25)';
+        ctx.fillRect(mx - mw / 2 + mw * 0.7, my, mw * 0.2, mh);
+
+        // Fill
+        const mpct = bk.meter.power / 100;
+        const mCol = mpct >= 0.7 && mpct <= 0.9 ? '#66bb6a' : mpct > 0.9 ? '#e53935' : '#ffd54f';
+        ctx.fillStyle = mCol;
+        ctx.fillRect(mx - mw / 2, my, fillW, mh);
+
+        // Indicator line
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(mx - mw / 2 + fillW, my - 2);
+        ctx.lineTo(mx - mw / 2 + fillW, my + mh + 2);
+        ctx.stroke();
+      }
+
+      if (bk.messageTimer > 0) {
+        bk.messageTimer--;
+        drawMessage(bk.message, bk.messageColor, 80);
+      }
+
+      const pct = bk.made + bk.missed > 0 ? Math.round(bk.made / (bk.made + bk.missed) * 100) : 0;
+      updateScoreboard(`
+        <div class="sb-row"><span class="sb-label">Baskets</span><span class="sb-val accent">${bk.made}</span></div>
+        <div class="sb-row"><span class="sb-label">Threes</span><span class="sb-val">${bk.threes}</span></div>
+        <div class="sb-row"><span class="sb-label">Misses</span><span class="sb-val">${bk.missed}</span></div>
+        <div class="sb-row"><span class="sb-label">FG %</span><span class="sb-val">${pct}%</span></div>
+      `);
+    }
+
+    // ============================================================
+    // SOCCER — Dribble and shoot on goal!
+    // ============================================================
+    let sc = {};
+
+    function initSoccer() {
+      document.getElementById('instructions').textContent = 'Arrow keys to dribble. Click once to aim, click again to shoot with power!';
+      sc = {
+        player: { x: 200, y: 250, speed: 4 },
+        ball: { x: 200, y: 270, held: true },
+        shot: null,
+        goalie: { x: 740, y: 250, vy: 2.5, height: 40 },
+        defenders: [],
+        teammates: [
+          { x: 300, y: 150, vx: 1.0, vy: 1.2, label: '#2' },
+          { x: 250, y: 350, vx: -0.7, vy: -1.0, label: '#3' },
+          { x: 400, y: 250, vx: 0.9, vy: 0.6, label: '#4' },
+        ],
+        meter: { active: false, power: 0, dir: 1 }, // shot power meter
+        goals: 0, saves: 0, shots: 0, steals: 0,
+        message: '', messageTimer: 0, messageColor: '#66bb6a',
+        resetTimer: 0,
+      };
+      spawnSoccerDefenders();
+    }
+
+    function spawnSoccerDefenders() {
+      sc.defenders = [];
+      const count = 3 + Math.floor(sc.goals * 0.5);
+      for (let i = 0; i < Math.min(count, 6); i++) {
+        sc.defenders.push({
+          x: 350 + i * 80 + Math.random() * 40,
+          y: 100 + Math.random() * 300,
+          vy: (Math.random() > 0.5 ? 1 : -1) * (1.5 + Math.random() * 1.5),
+          vx: 0,
+        });
+      }
+    }
+
+    function clickSoccer(mx, my) {
+      if (sc.shot || !sc.ball.held) return;
+      // Start the power meter on first click, shoot on second click
+      if (!sc.meter.active) {
+        sc.meter.active = true;
+        sc.meter.power = 0;
+        sc.meter.dir = 1;
+        sc.meter.aimY = my;
+        return;
+      }
+      // Second click — shoot with current meter power
+      sc.meter.active = false;
+      sc.shots++;
+      const targetX = 760;
+      const targetY = sc.meter.aimY;
+      const dx = targetX - sc.player.x;
+      const dy = targetY - sc.player.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const power = 4 + (sc.meter.power / 100) * 10; // 4 to 14 based on meter
+      sc.shot = {
+        x: sc.ball.x, y: sc.ball.y,
+        vx: (dx / dist) * power,
+        vy: (dy / dist) * power,
+        life: 80,
+      };
+      sc.ball.held = false;
+    }
+
+    function drawSoccerField() {
+      // Field
+      const fGrad = ctx.createLinearGradient(0, 0, 0, 500);
+      fGrad.addColorStop(0, '#2e8b2e');
+      fGrad.addColorStop(1, '#1e6b1e');
+      ctx.fillStyle = fGrad;
+      ctx.fillRect(0, 0, 800, 500);
+      // Grass stripes
+      for (let i = 0; i < 10; i++) {
+        ctx.fillStyle = i % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)';
+        ctx.fillRect(i * 80, 0, 80, 500);
+      }
+      // Outer boundary
+      ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(20, 30, 760, 440);
+      // Center line
+      ctx.beginPath(); ctx.moveTo(400, 30); ctx.lineTo(400, 470); ctx.stroke();
+      // Center circle
+      ctx.beginPath(); ctx.arc(400, 250, 60, 0, Math.PI * 2); ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,0.3)';
+      ctx.beginPath(); ctx.arc(400, 250, 3, 0, Math.PI * 2); ctx.fill();
+      // Goal box right
+      ctx.strokeRect(700, 150, 80, 200);
+      // Penalty area right
+      ctx.strokeRect(660, 100, 120, 300);
+      // Goal
+      ctx.fillStyle = 'rgba(255,255,255,0.08)';
+      ctx.fillRect(760, 180, 20, 140);
+      // Goal posts
+      ctx.fillStyle = '#ddd';
+      ctx.fillRect(758, 178, 6, 4); // top post
+      ctx.fillRect(758, 316, 6, 4); // bottom post
+      ctx.fillRect(758, 178, 4, 142); // back post
+      // Net
+      ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < 10; i++) {
+        ctx.beginPath(); ctx.moveTo(762, 182 + i * 14); ctx.lineTo(778, 182 + i * 14); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(762 + i * 1.8, 182); ctx.lineTo(762 + i * 1.8, 318); ctx.stroke();
+      }
+    }
+
+    function drawSoccerBall(x, y, r) {
+      ctx.fillStyle = '#f5f5f5';
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      // Pentagon pattern
+      ctx.fillStyle = '#333';
+      const angles = [0, 1.256, 2.513, 3.769, 5.026];
+      ctx.beginPath();
+      angles.forEach((a, i) => {
+        const px = x + Math.cos(a) * r * 0.45;
+        const py = y + Math.sin(a) * r * 0.45;
+        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+      });
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    function updateSoccer() {
+      const p = sc.player;
+
+      if (sc.resetTimer > 0) {
+        sc.resetTimer--;
+        if (sc.resetTimer === 0) {
+          sc.ball.held = true;
+          sc.ball.x = p.x;
+          sc.ball.y = p.y + 20;
+          sc.shot = null;
+          spawnSoccerDefenders();
+        }
+      }
+
+      // Movement
+      if (sc.resetTimer === 0) {
+        if (keys['ArrowUp'] || keys['w']) p.y -= p.speed;
+        if (keys['ArrowDown'] || keys['s']) p.y += p.speed;
+        if (keys['ArrowLeft'] || keys['a']) p.x -= p.speed;
+        if (keys['ArrowRight'] || keys['d']) p.x += p.speed;
+      }
+      p.x = Math.max(30, Math.min(700, p.x));
+      p.y = Math.max(50, Math.min(440, p.y));
+
+      // Ball follows player when held
+      if (sc.ball.held) {
+        sc.ball.x = p.x + 12;
+        sc.ball.y = p.y + 28;
+      }
+
+      drawSoccerField();
+
+      // Defenders
+      sc.defenders.forEach(d => {
+        d.y += d.vy;
+        if (d.y < 60 || d.y > 440) d.vy *= -1;
+        // Move toward player if close
+        if (sc.ball.held) {
+          const dx = p.x - d.x;
+          const dy = p.y - d.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 200) {
+            d.x += (dx / dist) * 0.6;
+          }
+        }
+        drawDefender(d.x, d.y, '#2255aa');
+
+        // Steal check
+        if (sc.ball.held && Math.abs(p.x - d.x) < 22 && Math.abs(p.y - d.y) < 28) {
+          sc.ball.held = false;
+          sc.steals++;
+          sc.message = 'STOLEN!';
+          sc.messageColor = '#e53935';
+          sc.messageTimer = 30;
+          sc.resetTimer = 50;
+        }
+      });
+
+      // Teammates (red jerseys, move around the field)
+      sc.teammates.forEach(tm => {
+        tm.x += tm.vx;
+        tm.y += tm.vy;
+        if (tm.x < 40 || tm.x > 700) tm.vx *= -1;
+        if (tm.y < 60 || tm.y > 430) tm.vy *= -1;
+        tm.x = Math.max(40, Math.min(700, tm.x));
+        tm.y = Math.max(60, Math.min(430, tm.y));
+        if (Math.random() < 0.01) { tm.vx += (Math.random() - 0.5) * 0.6; tm.vy += (Math.random() - 0.5) * 0.6; }
+        tm.vx = Math.max(-2, Math.min(2, tm.vx));
+        tm.vy = Math.max(-2, Math.min(2, tm.vy));
+        drawPlayer(tm.x, tm.y, '#e53935');
+        ctx.fillStyle = 'rgba(255,255,255,0.5)';
+        ctx.font = '600 9px Outfit';
+        ctx.textAlign = 'center';
+        ctx.fillText(tm.label, tm.x, tm.y - 42);
+      });
+
+      // Goalie
+      const g = sc.goalie;
+      g.y += g.vy;
+      if (g.y < 195 || g.y > 305) g.vy *= -1;
+      // Goalie reacts to shot
+      if (sc.shot) {
+        const targetY = sc.shot.y + sc.shot.vy * 8;
+        g.y += (targetY - g.y) * 0.08;
+      }
+      // Draw goalie
+      drawDefender(g.x, g.y, '#ffa726');
+      // Goalie gloves
+      ctx.fillStyle = '#66bb6a';
+      ctx.fillRect(g.x - 14, g.y - 8, 6, 8);
+      ctx.fillRect(g.x + 8, g.y - 8, 6, 8);
+
+      // Player
+      drawPlayer(p.x, p.y, '#e53935');
+
+      // Ball
+      if (sc.ball.held) {
+        drawSoccerBall(sc.ball.x, sc.ball.y, 7);
+      }
+
+      // Shot in flight
+      if (sc.shot) {
+        const s = sc.shot;
+        s.x += s.vx;
+        s.y += s.vy;
+        s.life--;
+
+        drawSoccerBall(s.x, s.y, 7);
+
+        // Shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.1)';
+        ctx.beginPath();
+        ctx.ellipse(s.x, 470, 5, 2, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Goal check (between posts: y 182 to 318)
+        if (s.x > 758 && s.x < 780) {
+          if (s.y > 182 && s.y < 318) {
+            // Check if goalie blocks it
+            if (Math.abs(s.y - g.y) < g.height / 2 + 8) {
+              sc.saves++;
+              sc.message = 'SAVED!';
+              sc.messageColor = '#ffa726';
+              sc.messageTimer = 35;
+            } else {
+              score += 1;
+              sc.goals++;
+              sc.message = 'GOAL!';
+              sc.messageColor = '#ffd54f';
+              sc.messageTimer = 50;
+              updateHUD();
+              // Goalie gets faster
+              g.vy = g.vy > 0 ? g.vy + 0.3 : g.vy - 0.3;
+            }
+            sc.shot = null;
+            sc.resetTimer = 55;
+          }
+        }
+
+        // Miss (off target)
+        if (sc.shot && (s.x > 790 || s.y < 30 || s.y > 470 || s.life <= 0)) {
+          sc.message = 'WIDE!';
+          sc.messageColor = '#ef5350';
+          sc.messageTimer = 25;
+          sc.shot = null;
+          sc.resetTimer = 50;
+        }
+      }
+
+      // Shot power meter
+      if (sc.meter.active) {
+        sc.meter.power += sc.meter.dir * 2.5;
+        if (sc.meter.power >= 100) { sc.meter.power = 100; sc.meter.dir = -1; }
+        if (sc.meter.power <= 0) { sc.meter.power = 0; sc.meter.dir = 1; }
+
+        // Draw meter bar (left side of screen)
+        const meterX = 35;
+        const meterY = 80;
+        const meterH = 340;
+        const fillH = (sc.meter.power / 100) * meterH;
+
+        ctx.fillStyle = 'rgba(0,0,0,0.5)';
+        ctx.beginPath();
+        ctx.roundRect(meterX - 10, meterY - 5, 20, meterH + 10, 6);
+        ctx.fill();
+
+        // Background
+        ctx.fillStyle = 'rgba(255,255,255,0.15)';
+        ctx.fillRect(meterX - 6, meterY, 12, meterH);
+
+        // Fill (green → yellow → red based on power)
+        const pct = sc.meter.power / 100;
+        const mColor = pct < 0.4 ? '#66bb6a' : pct < 0.7 ? '#ffd54f' : '#e53935';
+        ctx.fillStyle = mColor;
+        ctx.fillRect(meterX - 6, meterY + meterH - fillH, 12, fillH);
+
+        // Labels
+        ctx.fillStyle = '#fff';
+        ctx.font = '800 11px Outfit';
+        ctx.textAlign = 'center';
+        ctx.fillText('POWER', meterX, meterY - 12);
+        ctx.fillText(Math.round(sc.meter.power) + '%', meterX, meterY + meterH + 20);
+
+        // "Click to shoot!" prompt
+        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.font = '600 12px Outfit';
+        ctx.fillText('CLICK TO', meterX, meterY + meterH + 36);
+        ctx.fillText('SHOOT!', meterX, meterY + meterH + 50);
+      }
+
+      // Message
+      if (sc.messageTimer > 0) {
+        sc.messageTimer--;
+        drawMessage(sc.message, sc.messageColor, 80);
+      }
+
+      const accuracy = sc.shots > 0 ? Math.round((sc.goals / sc.shots) * 100) : 0;
+      updateScoreboard(`
+        <div class="sb-row"><span class="sb-label">Goals</span><span class="sb-val accent">${sc.goals}</span></div>
+        <div class="sb-row"><span class="sb-label">Shots</span><span class="sb-val">${sc.shots}</span></div>
+        <div class="sb-row"><span class="sb-label">Saves</span><span class="sb-val">${sc.saves}</span></div>
+        <div class="sb-row"><span class="sb-label">Steals</span><span class="sb-val">${sc.steals}</span></div>
+        <div class="sb-row"><span class="sb-label">Accuracy</span><span class="sb-val">${accuracy}%</span></div>
+      `);
+    }
+
+    // ---- FOOTBALL PICKER & MATH SETUP ----
+    function showFootballPicker() {
+      document.getElementById('fb-play-picker').style.display = 'flex';
+    }
+    function startFootballMode(mode) {
+      document.getElementById('fb-play-picker').style.display = 'none';
+      if (mode === 'pass') startGame('football');
+      else if (mode === 'run') startGame('football_run');
+      else if (mode === 'defense') startGame('football_defense');
+    }
+    function showMathSetup() {
+      document.getElementById('math-setup').style.display = 'flex';
+    }
+    // Running setup
+    let runDistance = 100;
+    function showRunningSetup() {
+      document.getElementById('run-picker').style.display = 'flex';
+    }
+    function startRunningMode(meters) {
+      document.getElementById('run-picker').style.display = 'none';
+      runDistance = meters;
+      startGame('running');
+    }
+
+    // Hold-to-run: track mouse/touch held state
+    let holding = false;
+    canvas.addEventListener('mousedown', () => { holding = true; });
+    document.addEventListener('mouseup', () => { holding = false; });
+    canvas.addEventListener('touchstart', e2 => { holding = true; });
+    canvas.addEventListener('touchend', e2 => { holding = false; });
+
+    let mathTimeLimit = 60;
+    let mathOp = 'all';
+    function pickMathOp(op) {
+      mathOp = op;
+      document.getElementById('math-step1').style.display = 'none';
+      document.getElementById('math-step2').style.display = '';
+    }
+    function startMath(seconds) {
+      document.getElementById('math-setup').style.display = 'none';
+      document.getElementById('math-step1').style.display = '';
+      document.getElementById('math-step2').style.display = 'none';
+      mathTimeLimit = seconds;
+      startGame('math');
+    }
+
+    // ============================================================
+    // FOOTBALL — Run the ball!
+    // ============================================================
+    let fr = {};
+    function initFootballRun() {
+      document.getElementById('instructions').textContent = 'Arrow keys to run! Dodge defenders and reach the end zone!';
+      timeLeft = 30;
+      fr = {
+        player: { x: 80, y: 250, speed: 4.5 },
+        defenders: [],
+        touchdowns: 0, tackles: 0, yardsGained: 0,
+        message: '', messageTimer: 0, messageColor: '#66bb6a',
+        spawnTimer: 0,
+      };
+      spawnRunDefenders();
+    }
+
+    function spawnRunDefenders() {
+      fr.defenders = [];
+      const count = 4 + Math.min(fr.touchdowns, 4);
+      for (let i = 0; i < count; i++) {
+        fr.defenders.push({
+          x: 200 + i * 120 + Math.random() * 60,
+          y: 80 + Math.random() * 340,
+          vy: (Math.random() > 0.5 ? 1 : -1) * (1.5 + Math.random() * 2),
+          speed: 0.8 + Math.random() * 0.8 + fr.touchdowns * 0.15,
+        });
+      }
+    }
+
+    function updateFootballRun() {
+      const p = fr.player;
+      if (keys['ArrowUp'] || keys['w']) p.y -= p.speed;
+      if (keys['ArrowDown'] || keys['s']) p.y += p.speed;
+      if (keys['ArrowLeft'] || keys['a']) p.x -= p.speed;
+      if (keys['ArrowRight'] || keys['d']) p.x += p.speed;
+      p.x = Math.max(10, Math.min(790, p.x));
+      p.y = Math.max(60, Math.min(440, p.y));
+
+      drawFootballField();
+
+      // Defenders chase player
+      fr.defenders.forEach(d => {
+        d.y += d.vy;
+        if (d.y < 60 || d.y > 440) d.vy *= -1;
+        // Chase horizontally
+        const dx = p.x - d.x;
+        const dy = p.y - d.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 250) {
+          d.x += (dx / dist) * d.speed;
+          d.y += (dy / dist) * d.speed * 0.5;
+        }
+
+        drawDefender(d.x, d.y, '#2255aa');
+        drawHelmet(d.x, d.y, '#2255aa');
+
+        // Tackle check
+        if (Math.abs(p.x - d.x) < 20 && Math.abs(p.y - d.y) < 25) {
+          fr.tackles++;
+          fr.message = 'TACKLED!';
+          fr.messageColor = '#e53935';
+          fr.messageTimer = 40;
+          fr.yardsGained += Math.max(0, Math.floor((p.x - 80) / 7));
+          p.x = 80;
+          p.y = 250;
+          spawnRunDefenders();
+        }
+      });
+
+      // Draw player (runner)
+      drawPlayer(p.x, p.y, '#e53935');
+      drawHelmet(p.x, p.y, '#e53935');
+      drawFootballInHand(p.x, p.y);
+
+      // Touchdown check
+      if (p.x > 770) {
+        score += 7;
+        fr.touchdowns++;
+        fr.message = 'TOUCHDOWN!';
+        fr.messageColor = '#ffd54f';
+        fr.messageTimer = 50;
+        updateHUD();
+        p.x = 80;
+        p.y = 250;
+        spawnRunDefenders();
+      }
+
+      if (fr.messageTimer > 0) {
+        fr.messageTimer--;
+        drawMessage(fr.message, fr.messageColor, 100);
+      }
+
+      updateScoreboard(`
+        <div class="sb-row"><span class="sb-label">Touchdowns</span><span class="sb-val accent">${fr.touchdowns}</span></div>
+        <div class="sb-row"><span class="sb-label">Tackles</span><span class="sb-val">${fr.tackles}</span></div>
+        <div class="sb-row"><span class="sb-label">Yards</span><span class="sb-val">${fr.yardsGained}</span></div>
+      `);
+    }
+
+    // ============================================================
+    // FOOTBALL — Defense! Tackle the runner!
+    // ============================================================
+    let fd = {};
+    function initFootballDefense() {
+      document.getElementById('instructions').textContent = 'Arrow keys to move. Click near the runner to tackle them!';
+      timeLeft = 30;
+      fd = {
+        player: { x: 500, y: 250, speed: 4 },
+        runner: { x: 80, y: 250, targetY: 250, speed: 3.5 },
+        tackles: 0, touchdownsAllowed: 0, attempts: 0,
+        message: '', messageTimer: 0, messageColor: '#66bb6a',
+        resetTimer: 0,
+      };
+      resetRunner();
+    }
+
+    function resetRunner() {
+      fd.attempts++;
+      fd.runner.x = 80;
+      fd.runner.y = 100 + Math.random() * 300;
+      fd.runner.targetY = fd.runner.y;
+      fd.runner.speed = 3 + Math.min(fd.tackles, 5) * 0.3;
+      fd.player.x = 500;
+      fd.resetTimer = 0;
+    }
+
+    function clickFootballDefense(mx, my) {
+      // Dive tackle — lunge toward click position
+      const p = fd.player;
+      const r = fd.runner;
+      const dist = Math.sqrt((p.x - r.x) ** 2 + (p.y - r.y) ** 2);
+      if (dist < 50) {
+        fd.tackles++;
+        score += 3;
+        fd.message = 'TACKLE!';
+        fd.messageColor = '#66bb6a';
+        fd.messageTimer = 40;
+        updateHUD();
+        fd.resetTimer = 50;
+      } else if (dist < 100) {
+        // Dive attempt — lunge player toward runner
+        const dx = r.x - p.x;
+        const dy = r.y - p.y;
+        p.x += dx * 0.5;
+        p.y += dy * 0.5;
+      }
+    }
+
+    function updateFootballDefense() {
+      const p = fd.player;
+      const r = fd.runner;
+
+      if (fd.resetTimer > 0) {
+        fd.resetTimer--;
+        if (fd.resetTimer === 0) resetRunner();
+      }
+
+      // Player movement
+      if (keys['ArrowUp'] || keys['w']) p.y -= p.speed;
+      if (keys['ArrowDown'] || keys['s']) p.y += p.speed;
+      if (keys['ArrowLeft'] || keys['a']) p.x -= p.speed;
+      if (keys['ArrowRight'] || keys['d']) p.x += p.speed;
+      p.x = Math.max(10, Math.min(790, p.x));
+      p.y = Math.max(60, Math.min(440, p.y));
+
+      drawFootballField();
+
+      // Runner AI — runs toward end zone, jukes around player
+      if (fd.resetTimer === 0) {
+        r.x += r.speed;
+        // Juke: change targetY periodically or when near defender
+        const distToPlayer = Math.sqrt((p.x - r.x) ** 2 + (p.y - r.y) ** 2);
+        if (distToPlayer < 120) {
+          // Juke away from player
+          const awayY = r.y + (r.y > p.y ? 40 : -40);
+          r.targetY = Math.max(80, Math.min(420, awayY));
+        }
+        if (Math.random() < 0.02) r.targetY = 100 + Math.random() * 300;
+        r.y += (r.targetY - r.y) * 0.06;
+
+        // Auto tackle if very close
+        if (distToPlayer < 25) {
+          fd.tackles++;
+          score += 3;
+          fd.message = 'TACKLE!';
+          fd.messageColor = '#66bb6a';
+          fd.messageTimer = 40;
+          updateHUD();
+          fd.resetTimer = 50;
+        }
+      }
+
+      // Draw runner (red — opponent has the ball)
+      drawPlayer(r.x, r.y, '#e53935');
+      drawHelmet(r.x, r.y, '#e53935');
+      drawFootballInHand(r.x, r.y);
+
+      // Draw defender (you — blue)
+      drawDefender(p.x, p.y, '#2255aa');
+      drawHelmet(p.x, p.y, '#2255aa');
+
+      // "Tackle range" indicator
+      const distToRunner = Math.sqrt((p.x - r.x) ** 2 + (p.y - r.y) ** 2);
+      if (distToRunner < 80 && fd.resetTimer === 0) {
+        ctx.strokeStyle = `rgba(255, 255, 100, ${0.3 + Math.sin(Date.now() / 150) * 0.15})`;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(r.x, r.y, 30, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      // Touchdown (runner reaches end zone)
+      if (r.x > 770 && fd.resetTimer === 0) {
+        fd.touchdownsAllowed++;
+        fd.message = 'TOUCHDOWN ALLOWED!';
+        fd.messageColor = '#e53935';
+        fd.messageTimer = 45;
+        fd.resetTimer = 50;
+      }
+
+      if (fd.messageTimer > 0) {
+        fd.messageTimer--;
+        drawMessage(fd.message, fd.messageColor, 100);
+      }
+
+      const tackleRate = fd.attempts > 0 ? Math.round((fd.tackles / fd.attempts) * 100) : 0;
+      updateScoreboard(`
+        <div class="sb-row"><span class="sb-label">Tackles</span><span class="sb-val accent">${fd.tackles}</span></div>
+        <div class="sb-row"><span class="sb-label">TDs Allowed</span><span class="sb-val">${fd.touchdownsAllowed}</span></div>
+        <div class="sb-row"><span class="sb-label">Attempts</span><span class="sb-val">${fd.attempts}</span></div>
+        <div class="sb-row"><span class="sb-label">Tackle %</span><span class="sb-val">${tackleRate}%</span></div>
+      `);
+    }
+
+    // ============================================================
+    // MATH — 3rd grade math challenge!
+    // ============================================================
+    let mt = {};
+    function initMath() {
+      document.getElementById('instructions').textContent = 'Click the correct answer!';
+      timeLeft = mathTimeLimit;
+      mt = {
+        correct: 0, wrong: 0, streak: 0, bestStreak: 0,
+        question: '', answer: 0, choices: [],
+        choiceBoxes: [], // { x, y, w, h, val, color }
+        message: '', messageTimer: 0, messageColor: '#66bb6a',
+        questionTimer: 0,
+        particles: [],
+      };
+      generateQuestion();
+    }
+
+    function generateQuestion() {
+      // Pick operation based on mathOp setting
+      const ops = { add: 0, sub: 1, mul: 2, div: 3 };
+      const type = mathOp === 'all' ? Math.floor(Math.random() * 4) : ops[mathOp];
+      let a, b, answer, symbol;
+      if (type === 0) { // addition
+        a = Math.floor(Math.random() * 100) + 10;
+        b = Math.floor(Math.random() * 100) + 10;
+        answer = a + b;
+        symbol = '+';
+      } else if (type === 1) { // subtraction
+        a = Math.floor(Math.random() * 100) + 20;
+        b = Math.floor(Math.random() * Math.min(a, 50)) + 1;
+        answer = a - b;
+        symbol = '−';
+      } else if (type === 2) { // multiplication
+        a = Math.floor(Math.random() * 10) + 2;
+        b = Math.floor(Math.random() * 10) + 2;
+        answer = a * b;
+        symbol = '×';
+      } else { // division
+        b = Math.floor(Math.random() * 9) + 2;
+        answer = Math.floor(Math.random() * 10) + 2;
+        a = b * answer;
+        symbol = '÷';
+      }
+
+      mt.numA = a;
+      mt.numB = b;
+      mt.symbol = symbol;
+      mt.question = `${a} ${symbol} ${b} = ?`;
+      mt.answer = answer;
+
+      // Generate 4 choices (1 correct + 3 wrong)
+      const choices = [answer];
+      while (choices.length < 4) {
+        let wrong = answer + Math.floor(Math.random() * 20) - 10;
+        if (wrong === answer || wrong < 0 || choices.includes(wrong)) continue;
+        choices.push(wrong);
+      }
+      // Shuffle
+      for (let i = choices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [choices[i], choices[j]] = [choices[j], choices[i]];
+      }
+      mt.choices = choices;
+      mt.questionTimer = 0;
+
+      // Position choice boxes
+      const boxW = 160;
+      const boxH = 70;
+      const gap = 20;
+      const startX = (800 - (boxW * 2 + gap)) / 2;
+      const startY = 280;
+      mt.choiceBoxes = choices.map((val, i) => ({
+        x: startX + (i % 2) * (boxW + gap),
+        y: startY + Math.floor(i / 2) * (boxH + gap),
+        w: boxW, h: boxH, val,
+        color: '#1a1b26', hover: false,
+      }));
+    }
+
+    function clickMath(mx, my) {
+      if (mt.messageTimer > 15) return; // cooldown after answer
+      mt.choiceBoxes.forEach(box => {
+        if (mx > box.x && mx < box.x + box.w && my > box.y && my < box.y + box.h) {
+          if (box.val === mt.answer) {
+            mt.correct++;
+            mt.streak++;
+            if (mt.streak > mt.bestStreak) mt.bestStreak = mt.streak;
+            const bonus = mt.streak >= 5 ? 3 : mt.streak >= 3 ? 2 : 1;
+            score += bonus;
+            mt.message = bonus > 1 ? `CORRECT! ${mt.streak} STREAK! +${bonus}` : 'CORRECT!';
+            mt.messageColor = '#66bb6a';
+            mt.messageTimer = 25;
+            // Celebration particles
+            for (let i = 0; i < 12; i++) {
+              mt.particles.push({
+                x: box.x + box.w / 2, y: box.y + box.h / 2,
+                vx: (Math.random() - 0.5) * 10,
+                vy: (Math.random() - 0.5) * 10 - 3,
+                life: 40,
+                color: ['#e53935', '#ffd54f', '#66bb6a', '#42a5f5'][Math.floor(Math.random() * 4)],
+              });
+            }
+            updateHUD();
+          } else {
+            mt.wrong++;
+            mt.streak = 0;
+            mt.message = `NOPE! It was ${mt.answer}`;
+            mt.messageColor = '#e53935';
+            mt.messageTimer = 35;
+          }
+          setTimeout(generateQuestion, 600);
+        }
+      });
+    }
+
+    function updateMath() {
+      // Background
+      const bg = ctx.createLinearGradient(0, 0, 0, 500);
+      bg.addColorStop(0, '#1a1a2e');
+      bg.addColorStop(1, '#16213e');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, 800, 500);
+
+      // Grid pattern
+      ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < 20; i++) {
+        ctx.beginPath(); ctx.moveTo(i * 40, 0); ctx.lineTo(i * 40, 500); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, i * 40); ctx.lineTo(800, i * 40); ctx.stroke();
+      }
+
+      // Question — vertical layout (like on paper)
+      mt.questionTimer++;
+      const scale = Math.min(mt.questionTimer / 8, 1);
+      ctx.save();
+      ctx.translate(400, 80);
+      ctx.scale(scale, scale);
+      ctx.font = '900 48px Outfit';
+      ctx.textAlign = 'right';
+      // Top number
+      ctx.fillStyle = 'rgba(0,0,0,0.3)';
+      ctx.fillText(String(mt.numA), 42, 2);
+      ctx.fillStyle = '#f0f0f4';
+      ctx.fillText(String(mt.numA), 40, 0);
+      // Symbol + bottom number
+      ctx.fillStyle = 'rgba(0,0,0,0.3)';
+      ctx.fillText(String(mt.numB), 42, 57);
+      ctx.fillStyle = '#f0f0f4';
+      ctx.fillText(String(mt.numB), 40, 55);
+      // Operation symbol on the left
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#e53935';
+      ctx.fillText(mt.symbol, -70, 57);
+      // Horizontal line under the problem
+      const lineW = 140;
+      ctx.strokeStyle = '#f0f0f4';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(-70, 72);
+      ctx.lineTo(-70 + lineW, 72);
+      ctx.stroke();
+      // Question mark below the line
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#6b6b7b';
+      ctx.font = '800 36px Outfit';
+      ctx.fillText('?', -2, 112);
+      ctx.restore();
+
+      // Streak indicator
+      if (mt.streak >= 2) {
+        ctx.fillStyle = '#ffd54f';
+        ctx.font = '800 18px Outfit';
+        ctx.textAlign = 'center';
+        ctx.fillText(`🔥 ${mt.streak} in a row!`, 400, 195);
+      }
+
+      // Choice boxes
+      const mouseX = canvas._mouseX || 0;
+      const mouseY = canvas._mouseY || 0;
+      mt.choiceBoxes.forEach(box => {
+        const hover = mouseX > box.x && mouseX < box.x + box.w && mouseY > box.y && mouseY < box.y + box.h;
+
+        // Box background
+        ctx.fillStyle = hover ? '#2a2b3a' : '#1a1b26';
+        ctx.beginPath();
+        ctx.roundRect(box.x, box.y, box.w, box.h, 14);
+        ctx.fill();
+
+        // Border
+        ctx.strokeStyle = hover ? '#e53935' : '#2a2b3a';
+        ctx.lineWidth = hover ? 2 : 1;
+        ctx.stroke();
+
+        // Hover lift shadow
+        if (hover) {
+          ctx.fillStyle = 'rgba(229, 57, 53, 0.1)';
+          ctx.beginPath();
+          ctx.roundRect(box.x, box.y + 2, box.w, box.h, 14);
+          ctx.fill();
+        }
+
+        // Number
+        ctx.fillStyle = hover ? '#fff' : '#e8e8ec';
+        ctx.font = '800 32px Outfit';
+        ctx.textAlign = 'center';
+        ctx.fillText(box.val, box.x + box.w / 2, box.y + box.h / 2 + 11);
+      });
+
+      // Particles
+      mt.particles.forEach(p => {
+        p.x += p.vx; p.y += p.vy; p.vy += 0.2; p.life--;
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.life / 40;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+      mt.particles = mt.particles.filter(p => p.life > 0);
+
+      // Message
+      if (mt.messageTimer > 0) {
+        mt.messageTimer--;
+        drawMessage(mt.message, mt.messageColor, 240);
+      }
+
+      const total = mt.correct + mt.wrong;
+      const pct = total > 0 ? Math.round((mt.correct / total) * 100) : 0;
+      updateScoreboard(`
+        <div class="sb-row"><span class="sb-label">Correct</span><span class="sb-val accent">${mt.correct}</span></div>
+        <div class="sb-row"><span class="sb-label">Wrong</span><span class="sb-val">${mt.wrong}</span></div>
+        <div class="sb-row"><span class="sb-label">Accuracy</span><span class="sb-val">${pct}%</span></div>
+        <div class="sb-row"><span class="sb-label">Best Streak</span><span class="sb-val">${mt.bestStreak}</span></div>
+      `);
+    }
+
+    // Track mouse position for math hover effects
+    canvas.addEventListener('mousemove', e => {
+      const rect = canvas.getBoundingClientRect();
+      canvas._mouseX = e.clientX - rect.left;
+      canvas._mouseY = e.clientY - rect.top;
+    });
+
+    // ============================================================
+    // RUNNING — Track Sprint Race!
+    // ============================================================
+    let rn = {};
+    function initRunning() {
+      document.getElementById('instructions').textContent = 'Hold down to run! Release to slow down!';
+      // Scale time by distance
+      timeLeft = runDistance <= 50 ? 20 : runDistance <= 100 ? 30 : 45;
+      // Scale finish line by distance (50m=short, 100m=medium, 150m=long)
+      const finishMap = { 50: 520, 100: 720, 150: 720 };
+      const scrollMap = { 50: false, 100: false, 150: true };
+      rn = {
+        player: { x: 80, y: 250, speed: 0 },
+        opponents: [
+          { x: 80, y: 150, speed: 0, baseSpeed: 2.4, color: '#42a5f5', name: 'Blue' },
+          { x: 80, y: 200, speed: 0, baseSpeed: 2.8, color: '#ffd54f', name: 'Gold' },
+          { x: 80, y: 300, speed: 0, baseSpeed: 3.1, color: '#ab47bc', name: 'Purple' },
+          { x: 80, y: 350, speed: 0, baseSpeed: 2.6, color: '#26a69a', name: 'Teal' },
+        ],
+        races: 0, wins: 0,
+        raceActive: true,
+        finishDist: runDistance * 6, // total pixel distance to cover
+        scrolling: runDistance >= 150,
+        cameraX: 0,
+        message: '', messageTimer: 0, messageColor: '#66bb6a',
+        momentum: 0,
+        maxSpeed: 5.5,
+        distance: runDistance,
+        laneY: [150, 200, 250, 300, 350],
+        countdown: 90, // 1.5 seconds at 60fps
+        started: false,
+      };
+      // Adjust opponent speed by distance
+      if (runDistance === 50) {
+        rn.opponents.forEach(o => o.baseSpeed *= 1.1);
+        rn.maxSpeed = 5;
+      } else if (runDistance === 150) {
+        rn.opponents.forEach(o => o.baseSpeed *= 0.9);
+        rn.maxSpeed = 5;
+      }
+    }
+
+    function clickRunning(mx, my) {
+      // no click action — hold to run
+    }
+
+    function updateRunning() {
+      const trackLen = rn.finishDist + 150;
+      const camX = rn.scrolling ? rn.cameraX : 0;
+
+      // Track background
+      ctx.fillStyle = '#c0392b';
+      ctx.fillRect(0, 0, 800, 500);
+
+      // Lanes
+      rn.laneY.forEach((ly, i) => {
+        ctx.fillStyle = i % 2 === 0 ? '#a93226' : '#b03a2e';
+        ctx.fillRect(0, ly - 22, 800, 44);
+        ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([10, 10]);
+        ctx.beginPath(); ctx.moveTo(0, ly - 22); ctx.lineTo(800, ly - 22); ctx.stroke();
+        ctx.setLineDash([]);
+      });
+
+      // Start line
+      const startLineX = 70 - camX;
+      if (startLineX > -10 && startLineX < 810) {
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(startLineX, 120); ctx.lineTo(startLineX, 380); ctx.stroke();
+      }
+
+      // Finish line (checkered)
+      const finishScreenX = 70 + rn.finishDist - camX;
+      if (finishScreenX > -40 && finishScreenX < 840) {
+        for (let row = 0; row < 26; row++) {
+          for (let col = 0; col < 3; col++) {
+            ctx.fillStyle = (row + col) % 2 === 0 ? '#fff' : '#222';
+            ctx.fillRect(finishScreenX + col * 10, 120 + row * 10, 10, 10);
+          }
+        }
+      }
+
+      // Distance markers every ~50m
+      for (let m = 50; m <= rn.distance; m += 50) {
+        const mx = 70 + (m / rn.distance) * rn.finishDist - camX;
+        if (mx > 0 && mx < 800) {
+          ctx.fillStyle = 'rgba(255,255,255,0.2)';
+          ctx.font = '600 12px Outfit';
+          ctx.textAlign = 'center';
+          ctx.fillText(`${m}m`, mx, 110);
+        }
+      }
+
+      // Countdown before race starts
+      if (rn.countdown > 0) {
+        rn.countdown--;
+        const secs = Math.ceil(rn.countdown / 60);
+        ctx.fillStyle = '#ffd54f';
+        ctx.font = '900 72px Outfit';
+        ctx.textAlign = 'center';
+        if (secs > 0) {
+          ctx.fillText(secs, 400, 80);
+        } else {
+          ctx.fillStyle = '#66bb6a';
+          ctx.fillText('GO!', 400, 80);
+        }
+        // Draw runners in starting position
+        rn.opponents.forEach(opp => {
+          drawPlayer(opp.x - camX, opp.y, opp.color, 1);
+        });
+        drawPlayer(rn.player.x - camX, rn.player.y, '#e53935', 1);
+        // Player arrow
+        ctx.fillStyle = '#ffd54f';
+        ctx.beginPath();
+        ctx.moveTo(rn.player.x - camX, rn.player.y - 42);
+        ctx.lineTo(rn.player.x - camX - 6, rn.player.y - 50);
+        ctx.lineTo(rn.player.x - camX + 6, rn.player.y - 50);
+        ctx.fill();
+        return;
+      }
+      rn.started = true;
+
+      // Hold to run — holding builds momentum, releasing lets it decay
+      if (holding && rn.raceActive) {
+        rn.momentum = Math.min(rn.momentum + 0.12, rn.maxSpeed);
+      } else {
+        rn.momentum *= 0.97;
+        if (rn.momentum < 0.1) rn.momentum = 0;
+      }
+      rn.player.speed = rn.momentum;
+
+      if (rn.raceActive) {
+        rn.player.x += rn.player.speed;
+
+        // Move opponents
+        rn.opponents.forEach(opp => {
+          opp.speed = opp.baseSpeed + (Math.random() - 0.3) * 0.4;
+          opp.x += opp.speed;
+        });
+
+        // Scroll camera for 150m
+        if (rn.scrolling) {
+          rn.cameraX = Math.max(0, rn.player.x - 200);
+        }
+
+        // Check finish
+        const finishLine = 70 + rn.finishDist;
+        if (rn.player.x >= finishLine) {
+          rn.raceActive = false;
+          rn.races++;
+          const behind = rn.opponents.filter(o => o.x < finishLine).length;
+          const place = rn.opponents.length - behind + 1;
+          if (place === 1) {
+            rn.wins++; score += 5;
+            rn.message = '🥇 1ST PLACE! +5'; rn.messageColor = '#ffd54f';
+          } else if (place === 2) {
+            score += 3;
+            rn.message = '🥈 2ND PLACE! +3'; rn.messageColor = '#bdbdbd';
+          } else if (place === 3) {
+            score += 1;
+            rn.message = '🥉 3RD PLACE! +1'; rn.messageColor = '#ff8a65';
+          } else {
+            rn.message = `${place}TH PLACE...`; rn.messageColor = '#e53935';
+          }
+          rn.messageTimer = 60;
+          updateHUD();
+          setTimeout(() => {
+            rn.player.x = 80; rn.momentum = 0; rn.cameraX = 0;
+            rn.opponents.forEach(opp => {
+              opp.x = 80;
+              opp.baseSpeed += 0.12;
+            });
+            rn.raceActive = true;
+          }, 1500);
+        }
+      }
+
+      // Draw opponents
+      rn.opponents.forEach(opp => {
+        const sx = opp.x - camX;
+        if (sx > -40 && sx < 840) drawPlayer(sx, opp.y, opp.color, 1);
+      });
+
+      // Draw player
+      const px = rn.player.x - camX;
+      drawPlayer(Math.min(px, 780), rn.player.y, '#e53935', 1);
+      // Player arrow
+      ctx.fillStyle = '#ffd54f';
+      ctx.beginPath();
+      ctx.moveTo(Math.min(px, 780), rn.player.y - 42);
+      ctx.lineTo(Math.min(px, 780) - 6, rn.player.y - 50);
+      ctx.lineTo(Math.min(px, 780) + 6, rn.player.y - 50);
+      ctx.fill();
+
+      // Speed meter
+      ctx.fillStyle = 'rgba(0,0,0,0.4)';
+      ctx.fillRect(20, 400, 160, 16);
+      const pct = rn.momentum / rn.maxSpeed;
+      ctx.fillStyle = pct > 0.7 ? '#ffd54f' : pct > 0.4 ? '#66bb6a' : '#42a5f5';
+      ctx.fillRect(20, 400, 160 * pct, 16);
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 1;
+      ctx.strokeRect(20, 400, 160, 16);
+      ctx.fillStyle = '#fff'; ctx.font = '600 11px Outfit'; ctx.textAlign = 'center';
+      ctx.fillText('SPEED', 100, 434);
+
+      // Hold indicator
+      ctx.fillStyle = holding ? '#66bb6a' : '#6b6b7b';
+      ctx.font = '800 20px Outfit'; ctx.textAlign = 'center';
+      ctx.fillText(holding ? '🏃 RUNNING!' : 'HOLD TO RUN!', 400, 460);
+
+      // Distance label
+      ctx.fillStyle = '#9b9bab'; ctx.font = '600 14px Outfit';
+      ctx.fillText(`${rn.distance}m Race`, 400, 480);
+
+      // Message
+      if (rn.messageTimer > 0) {
+        rn.messageTimer--;
+        drawMessage(rn.message, rn.messageColor, 80);
+      }
+
+      updateScoreboard(`
+        <div class="sb-row"><span class="sb-label">Distance</span><span class="sb-val">${rn.distance}m</span></div>
+        <div class="sb-row"><span class="sb-label">Races</span><span class="sb-val">${rn.races}</span></div>
+        <div class="sb-row"><span class="sb-label">Wins</span><span class="sb-val accent">${rn.wins}</span></div>
+      `);
+    }
+
+    // ============================================================
+    // DODGEBALL — Two teams battle it out!
+    // ============================================================
+    let db = {};
+    function initDodgeball() {
+      document.getElementById('instructions').textContent = 'Arrow keys to move, click to throw! Hit opponents, dodge their throws!';
+      timeLeft = 45;
+      db = {
+        player: { x: 150, y: 250, w: 30, h: 40, hasBall: true },
+        teammates: [],
+        opponents: [],
+        balls: [], // { x, y, vx, vy, team: 'red'|'blue' }
+        looseBalls: [], // balls on the ground to pick up
+        redScore: 0, blueScore: 0,
+        redOut: 0, blueOut: 0,
+        message: '', messageTimer: 0, messageColor: '#66bb6a',
+        throwCooldown: 0,
+        round: 1,
+      };
+      // Create teammates (red team, left side)
+      for (let i = 0; i < 3; i++) {
+        db.teammates.push({
+          x: 100 + Math.random() * 200,
+          y: 100 + i * 120,
+          vx: 0, vy: (Math.random() - 0.5) * 2,
+          alive: true, hasBall: Math.random() > 0.5,
+          throwTimer: Math.floor(Math.random() * 120) + 60,
+        });
+      }
+      // Create opponents (blue team, right side)
+      for (let i = 0; i < 4; i++) {
+        db.opponents.push({
+          x: 500 + Math.random() * 200,
+          y: 80 + i * 100,
+          vx: 0, vy: (Math.random() - 0.5) * 2,
+          alive: true, hasBall: true,
+          throwTimer: Math.floor(Math.random() * 80) + 40,
+          dodgeTimer: 0,
+        });
+      }
+      // A few loose balls in the middle
+      for (let i = 0; i < 2; i++) {
+        db.looseBalls.push({ x: 350 + Math.random() * 100, y: 150 + Math.random() * 200 });
+      }
+    }
+
+    function clickDodgeball(mx, my) {
+      if (!db.player.hasBall || db.throwCooldown > 0) return;
+      // Throw ball toward click position
+      const dx = mx - db.player.x;
+      const dy = my - db.player.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 1) return;
+      db.balls.push({
+        x: db.player.x, y: db.player.y,
+        vx: (dx / dist) * 10,
+        vy: (dy / dist) * 10,
+        team: 'red',
+      });
+      db.player.hasBall = false;
+      db.throwCooldown = 20;
+    }
+
+    function updateDodgeball() {
+      // Court background
+      ctx.fillStyle = '#2d5016';
+      ctx.fillRect(0, 0, 800, 500);
+
+      // Court floor (gym style)
+      ctx.fillStyle = '#c4883a';
+      ctx.fillRect(40, 40, 720, 420);
+      ctx.fillStyle = '#b87d35';
+      ctx.fillRect(40, 40, 720, 420);
+
+      // Center line
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(400, 40); ctx.lineTo(400, 460); ctx.stroke();
+
+      // Team areas
+      ctx.fillStyle = 'rgba(229, 57, 53, 0.08)';
+      ctx.fillRect(40, 40, 360, 420);
+      ctx.fillStyle = 'rgba(66, 165, 245, 0.08)';
+      ctx.fillRect(400, 40, 360, 420);
+
+      // Boundary lines
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(40, 40, 720, 420);
+
+      // Team labels
+      ctx.font = '600 14px Outfit';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = 'rgba(229,57,53,0.4)';
+      ctx.fillText('RED TEAM', 220, 30);
+      ctx.fillStyle = 'rgba(66,165,245,0.4)';
+      ctx.fillText('BLUE TEAM', 580, 30);
+
+      db.throwCooldown = Math.max(0, db.throwCooldown - 1);
+
+      // Move player
+      const spd = 4;
+      if (keys['ArrowUp'] && db.player.y > 60) db.player.y -= spd;
+      if (keys['ArrowDown'] && db.player.y < 440) db.player.y += spd;
+      if (keys['ArrowLeft'] && db.player.x > 60) db.player.x -= spd;
+      if (keys['ArrowRight'] && db.player.x < 370) db.player.x += spd; // can't cross center
+
+      // Pick up loose balls
+      if (!db.player.hasBall) {
+        db.looseBalls = db.looseBalls.filter(lb => {
+          const d = Math.sqrt((lb.x - db.player.x) ** 2 + (lb.y - db.player.y) ** 2);
+          if (d < 30) { db.player.hasBall = true; return false; }
+          return true;
+        });
+      }
+
+      // Move teammates AI
+      db.teammates.forEach(tm => {
+        if (!tm.alive) return;
+        // Wander up/down
+        tm.y += tm.vy;
+        if (tm.y < 80 || tm.y > 420) tm.vy *= -1;
+        tm.vy += (Math.random() - 0.5) * 0.3;
+        tm.vy = Math.max(-2, Math.min(2, tm.vy));
+
+        // Pick up loose balls
+        if (!tm.hasBall) {
+          db.looseBalls = db.looseBalls.filter(lb => {
+            const d = Math.sqrt((lb.x - tm.x) ** 2 + (lb.y - tm.y) ** 2);
+            if (d < 30) { tm.hasBall = true; return false; }
+            return true;
+          });
+        }
+
+        // Throw at opponents
+        tm.throwTimer--;
+        if (tm.throwTimer <= 0 && tm.hasBall) {
+          const targets = db.opponents.filter(o => o.alive);
+          if (targets.length > 0) {
+            const target = targets[Math.floor(Math.random() * targets.length)];
+            const dx = target.x - tm.x;
+            const dy = target.y - tm.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            db.balls.push({
+              x: tm.x, y: tm.y,
+              vx: (dx / dist) * 8 + (Math.random() - 0.5) * 2,
+              vy: (dy / dist) * 8 + (Math.random() - 0.5) * 2,
+              team: 'red',
+            });
+            tm.hasBall = false;
+          }
+          tm.throwTimer = Math.floor(Math.random() * 100) + 60;
+        }
+      });
+
+      // Move opponents AI
+      db.opponents.forEach(opp => {
+        if (!opp.alive) return;
+        // Wander
+        opp.y += opp.vy;
+        if (opp.y < 80 || opp.y > 420) opp.vy *= -1;
+        opp.vy += (Math.random() - 0.5) * 0.3;
+        opp.vy = Math.max(-2.5, Math.min(2.5, opp.vy));
+
+        // Pick up loose balls
+        if (!opp.hasBall) {
+          db.looseBalls = db.looseBalls.filter(lb => {
+            const d = Math.sqrt((lb.x - opp.x) ** 2 + (lb.y - opp.y) ** 2);
+            if (d < 30) { opp.hasBall = true; return false; }
+            return true;
+          });
+        }
+
+        // Dodge incoming red balls
+        opp.dodgeTimer--;
+        db.balls.forEach(ball => {
+          if (ball.team === 'red') {
+            const d = Math.sqrt((ball.x - opp.x) ** 2 + (ball.y - opp.y) ** 2);
+            if (d < 100 && opp.dodgeTimer <= 0) {
+              opp.vy = ball.y > opp.y ? -3 : 3;
+              opp.dodgeTimer = 20;
+            }
+          }
+        });
+
+        // Throw at red team
+        opp.throwTimer--;
+        if (opp.throwTimer <= 0 && opp.hasBall) {
+          // Target player or teammates
+          const targets = [db.player, ...db.teammates.filter(t => t.alive)];
+          const target = targets[Math.floor(Math.random() * targets.length)];
+          const dx = target.x - opp.x;
+          const dy = target.y - opp.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          db.balls.push({
+            x: opp.x, y: opp.y,
+            vx: (dx / dist) * 7 + (Math.random() - 0.5) * 1.5,
+            vy: (dy / dist) * 7 + (Math.random() - 0.5) * 1.5,
+            team: 'blue',
+          });
+          opp.hasBall = false;
+          opp.throwTimer = Math.floor(Math.random() * 80) + 50;
+        }
+      });
+
+      // Move balls
+      db.balls = db.balls.filter(ball => {
+        ball.x += ball.vx;
+        ball.y += ball.vy;
+        // Off screen
+        if (ball.x < 0 || ball.x > 800 || ball.y < 0 || ball.y > 500) {
+          db.looseBalls.push({ x: Math.max(60, Math.min(740, ball.x)), y: Math.max(60, Math.min(440, ball.y)) });
+          return false;
+        }
+
+        // Check hits
+        if (ball.team === 'red') {
+          // Hit opponents
+          for (let opp of db.opponents) {
+            if (!opp.alive) continue;
+            const d = Math.sqrt((ball.x - opp.x) ** 2 + (ball.y - opp.y) ** 2);
+            if (d < 25) {
+              opp.alive = false;
+              db.blueOut++;
+              score += 2;
+              db.message = 'HIT! +2';
+              db.messageColor = '#66bb6a';
+              db.messageTimer = 25;
+              updateHUD();
+              db.looseBalls.push({ x: opp.x, y: opp.y });
+              return false;
+            }
+          }
+        } else {
+          // Hit player
+          const dp = Math.sqrt((ball.x - db.player.x) ** 2 + (ball.y - db.player.y) ** 2);
+          if (dp < 22) {
+            db.redOut++;
+            db.message = 'YOU GOT HIT!';
+            db.messageColor = '#e53935';
+            db.messageTimer = 35;
+            score = Math.max(0, score - 1);
+            updateHUD();
+            db.looseBalls.push({ x: db.player.x, y: db.player.y });
+            // Respawn player briefly
+            db.player.x = 150;
+            db.player.y = 250;
+            db.player.hasBall = false;
+            return false;
+          }
+          // Hit teammates
+          for (let tm of db.teammates) {
+            if (!tm.alive) continue;
+            const d = Math.sqrt((ball.x - tm.x) ** 2 + (ball.y - tm.y) ** 2);
+            if (d < 22) {
+              tm.alive = false;
+              db.redOut++;
+              db.looseBalls.push({ x: tm.x, y: tm.y });
+              return false;
+            }
+          }
+        }
+        return true;
+      });
+
+      // Check round over — all opponents out
+      const oppsAlive = db.opponents.filter(o => o.alive).length;
+      if (oppsAlive === 0) {
+        db.round++;
+        db.redScore++;
+        score += 5;
+        db.message = '🎉 ROUND WIN! +5';
+        db.messageColor = '#ffd54f';
+        db.messageTimer = 45;
+        updateHUD();
+        // Reset round
+        db.opponents.forEach((opp, i) => {
+          opp.alive = true;
+          opp.x = 500 + Math.random() * 200;
+          opp.y = 80 + i * 100;
+          opp.hasBall = true;
+          opp.throwTimer = Math.floor(Math.random() * 60) + 30;
+        });
+        db.teammates.forEach(tm => {
+          tm.alive = true;
+          tm.hasBall = Math.random() > 0.5;
+          tm.throwTimer = Math.floor(Math.random() * 80) + 40;
+        });
+        db.player.hasBall = true;
+        db.blueOut = 0;
+        db.redOut = 0;
+      }
+
+      // Draw loose balls
+      db.looseBalls.forEach(lb => {
+        ctx.fillStyle = '#e53935';
+        ctx.beginPath();
+        ctx.arc(lb.x, lb.y, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#b71c1c';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      });
+
+      // Draw teammates
+      db.teammates.forEach(tm => {
+        if (!tm.alive) return;
+        drawPlayer(tm.x, tm.y, '#e53935', 1);
+        if (tm.hasBall) {
+          ctx.fillStyle = '#e53935';
+          ctx.beginPath();
+          ctx.arc(tm.x + 10, tm.y - 5, 5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+
+      // Draw opponents
+      db.opponents.forEach(opp => {
+        if (!opp.alive) return;
+        drawPlayer(opp.x, opp.y, '#42a5f5', -1);
+        if (opp.hasBall) {
+          ctx.fillStyle = '#e53935';
+          ctx.beginPath();
+          ctx.arc(opp.x - 10, opp.y - 5, 5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+
+      // Draw player
+      drawPlayer(db.player.x, db.player.y, '#e53935', 1);
+      // Player indicator arrow
+      ctx.fillStyle = '#ffd54f';
+      ctx.beginPath();
+      ctx.moveTo(db.player.x, db.player.y - 42);
+      ctx.lineTo(db.player.x - 6, db.player.y - 50);
+      ctx.lineTo(db.player.x + 6, db.player.y - 50);
+      ctx.fill();
+      // Ball in hand
+      if (db.player.hasBall) {
+        ctx.fillStyle = '#e53935';
+        ctx.beginPath();
+        ctx.arc(db.player.x + 12, db.player.y - 5, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#b71c1c';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      // Draw flying balls
+      db.balls.forEach(ball => {
+        ctx.fillStyle = '#e53935';
+        ctx.beginPath();
+        ctx.arc(ball.x, ball.y, 5, 0, Math.PI * 2);
+        ctx.fill();
+        // Motion trail
+        ctx.fillStyle = 'rgba(229, 57, 53, 0.3)';
+        ctx.beginPath();
+        ctx.arc(ball.x - ball.vx * 0.5, ball.y - ball.vy * 0.5, 4, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Message
+      if (db.messageTimer > 0) {
+        db.messageTimer--;
+        drawMessage(db.message, db.messageColor, 240);
+      }
+
+      // Scoreboard
+      const aliveRed = db.teammates.filter(t => t.alive).length + 1; // +1 for player
+      const aliveBlue = db.opponents.filter(o => o.alive).length;
+      updateScoreboard(`
+        <div class="sb-row"><span class="sb-label">Round</span><span class="sb-val">${db.round}</span></div>
+        <div class="sb-row"><span class="sb-label">Red Alive</span><span class="sb-val accent">${aliveRed}</span></div>
+        <div class="sb-row"><span class="sb-label">Blue Alive</span><span class="sb-val">${aliveBlue}</span></div>
+        <div class="sb-row"><span class="sb-label">Round Wins</span><span class="sb-val">${db.redScore}</span></div>
+      `);
+    }
+
+    // ============================================================
+    // VOLLEYBALL — Beach volleyball!
+    // ============================================================
+    let vb = {};
+    function initVolleyball() {
+      document.getElementById('instructions').textContent = 'Arrow keys to move, click/tap to bump the ball! Keep it in play!';
+      timeLeft = 45;
+      vb = {
+        player: { x: 200, y: 380, speed: 4.5 },
+        teammates: [
+          { x: 120, y: 360, vy: 0, role: 'left' },
+          { x: 280, y: 360, vy: 0, role: 'right' },
+        ],
+        opponents: [
+          { x: 500, y: 360, vy: 0, role: 'left' },
+          { x: 600, y: 360, vy: 0, role: 'center' },
+          { x: 700, y: 360, vy: 0, role: 'right' },
+        ],
+        ball: { x: 200, y: 200, vx: 3, vy: -4, gravity: 0.15, onGround: false },
+        net: { x: 400, y: 200, h: 200 },
+        myScore: 0, oppScore: 0,
+        serving: 'player', // 'player' or 'opponent'
+        rally: false,
+        touches: 0, // team touches (max 3)
+        lastTouch: '', // 'red' or 'blue'
+        message: '', messageTimer: 0, messageColor: '#66bb6a',
+        serveTimer: 0,
+        pointScored: false,
+      };
+      vb.ball.x = 200;
+      vb.ball.y = 300;
+      vb.ball.vx = 0;
+      vb.ball.vy = 0;
+      vb.serveTimer = 40;
+    }
+
+    function clickVolleyball(mx, my) {
+      // Bump the ball if close to player
+      const b = vb.ball;
+      const p = vb.player;
+      const dist = Math.sqrt((b.x - p.x) ** 2 + (b.y - p.y) ** 2);
+      if (dist < 60 && !vb.pointScored) {
+        // Direct ball toward opponent side with arc
+        const power = 6 + Math.random() * 2;
+        b.vx = 3 + Math.random() * 2;
+        b.vy = -power;
+        vb.touches++;
+        vb.lastTouch = 'red';
+        vb.rally = true;
+      }
+    }
+
+    function serveBall(team) {
+      const b = vb.ball;
+      vb.touches = 0;
+      vb.pointScored = false;
+      if (team === 'player') {
+        b.x = 200; b.y = 300;
+        b.vx = 4 + Math.random() * 2;
+        b.vy = -5 - Math.random() * 2;
+        vb.lastTouch = 'red';
+      } else {
+        b.x = 600; b.y = 300;
+        b.vx = -(4 + Math.random() * 2);
+        b.vy = -5 - Math.random() * 2;
+        vb.lastTouch = 'blue';
+      }
+      vb.rally = true;
+    }
+
+    function updateVolleyball() {
+      // Sky background
+      const sky = ctx.createLinearGradient(0, 0, 0, 500);
+      sky.addColorStop(0, '#87CEEB');
+      sky.addColorStop(0.6, '#e0f0ff');
+      sky.addColorStop(1, '#f4d798');
+      ctx.fillStyle = sky;
+      ctx.fillRect(0, 0, 800, 500);
+
+      // Sun
+      ctx.fillStyle = '#ffd54f';
+      ctx.beginPath(); ctx.arc(680, 60, 40, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = 'rgba(255,213,79,0.2)';
+      ctx.beginPath(); ctx.arc(680, 60, 60, 0, Math.PI * 2); ctx.fill();
+
+      // Sand
+      ctx.fillStyle = '#f4d798';
+      ctx.fillRect(0, 400, 800, 100);
+      ctx.fillStyle = '#e8c878';
+      ctx.fillRect(0, 395, 800, 8);
+
+      // Court lines on sand
+      ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(60, 395, 680, 80);
+
+      // Net
+      ctx.fillStyle = '#333';
+      ctx.fillRect(398, 200, 4, 200); // net pole
+      // Net mesh
+      ctx.strokeStyle = '#555';
+      ctx.lineWidth = 1;
+      for (let ny = 210; ny < 400; ny += 12) {
+        ctx.beginPath(); ctx.moveTo(390, ny); ctx.lineTo(410, ny); ctx.stroke();
+      }
+      for (let nx = 390; nx <= 410; nx += 5) {
+        ctx.beginPath(); ctx.moveTo(nx, 200); ctx.lineTo(nx, 400); ctx.stroke();
+      }
+      // Net top
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(385, 198, 30, 4);
+
+      // Serve timer
+      if (vb.serveTimer > 0) {
+        vb.serveTimer--;
+        if (vb.serveTimer === 0) {
+          serveBall(vb.serving);
+        }
+      }
+
+      // Move player
+      const p = vb.player;
+      if (keys['ArrowLeft'] || keys['a']) p.x -= p.speed;
+      if (keys['ArrowRight'] || keys['d']) p.x += p.speed;
+      if (keys['ArrowUp'] || keys['w']) p.y -= p.speed;
+      if (keys['ArrowDown'] || keys['s']) p.y += p.speed;
+      // Clamp to left side
+      p.x = Math.max(60, Math.min(380, p.x));
+      p.y = Math.max(280, Math.min(420, p.y));
+
+      // Move teammates to track ball on our side
+      vb.teammates.forEach(tm => {
+        const targetX = tm.role === 'left' ? 140 : 280;
+        const targetY = vb.ball.x < 400 ? Math.min(Math.max(vb.ball.y + 40, 320), 400) : 370;
+        tm.x += (targetX - tm.x) * 0.03;
+        tm.y += (targetY - tm.y) * 0.04;
+        tm.x = Math.max(60, Math.min(380, tm.x));
+        tm.y = Math.max(300, Math.min(420, tm.y));
+      });
+
+      // Move opponents AI
+      vb.opponents.forEach((opp, i) => {
+        const baseX = [500, 600, 700][i];
+        // Track ball when on their side
+        if (vb.ball.x > 400) {
+          opp.x += (vb.ball.x - opp.x) * 0.04;
+          opp.y += (Math.min(vb.ball.y + 30, 400) - opp.y) * 0.04;
+        } else {
+          opp.x += (baseX - opp.x) * 0.02;
+          opp.y += (370 - opp.y) * 0.03;
+        }
+        opp.x = Math.max(420, Math.min(740, opp.x));
+        opp.y = Math.max(300, Math.min(420, opp.y));
+      });
+
+      // Ball physics
+      const b = vb.ball;
+      if (vb.rally) {
+        b.vy += b.gravity;
+        b.x += b.vx;
+        b.y += b.vy;
+
+        // Net collision
+        if (b.x > 388 && b.x < 412 && b.y > 200) {
+          b.vx *= -0.5;
+          b.x = b.vx > 0 ? 412 : 388;
+        }
+
+        // Auto-bump by teammates when ball is close
+        vb.teammates.forEach(tm => {
+          const d = Math.sqrt((b.x - tm.x) ** 2 + (b.y - tm.y) ** 2);
+          if (d < 35 && b.vy > 0 && vb.lastTouch === 'red' && vb.touches < 3) {
+            // Set ball toward opponent side
+            b.vy = -5.5 - Math.random() * 2;
+            b.vx = 3 + Math.random() * 2;
+            vb.touches++;
+          }
+        });
+
+        // Auto-bump by opponents
+        vb.opponents.forEach(opp => {
+          const d = Math.sqrt((b.x - opp.x) ** 2 + (b.y - opp.y) ** 2);
+          if (d < 35 && b.vy > 0 && vb.lastTouch !== 'blue') {
+            b.vy = -5.5 - Math.random() * 2;
+            b.vx = -(3 + Math.random() * 3);
+            vb.lastTouch = 'blue';
+            vb.touches = 1;
+          } else if (d < 35 && b.vy > 0 && vb.touches < 3) {
+            b.vy = -5 - Math.random() * 2;
+            b.vx = -(2 + Math.random() * 3);
+            vb.touches++;
+          }
+        });
+
+        // Player bump (auto when close + ball falling)
+        const pd = Math.sqrt((b.x - p.x) ** 2 + (b.y - p.y) ** 2);
+        if (pd < 40 && b.vy > 0) {
+          b.vy = -6 - Math.random() * 2;
+          b.vx = 3 + Math.random() * 2;
+          vb.touches++;
+          vb.lastTouch = 'red';
+        }
+
+        // Ball hits ground
+        if (b.y > 430 && !vb.pointScored) {
+          vb.pointScored = true;
+          vb.rally = false;
+          b.vy = 0; b.vx = 0;
+
+          if (b.x < 400) {
+            // Ball landed on our side — opponent scores
+            vb.oppScore++;
+            vb.message = 'OPPONENT POINT!';
+            vb.messageColor = '#e53935';
+            vb.serving = 'opponent';
+          } else {
+            // Ball landed on their side — we score
+            vb.myScore++;
+            score += 2;
+            vb.message = 'YOUR POINT! +2';
+            vb.messageColor = '#66bb6a';
+            vb.serving = 'player';
+            updateHUD();
+          }
+          vb.messageTimer = 40;
+          vb.serveTimer = 60;
+          vb.touches = 0;
+        }
+
+        // Keep ball in bounds horizontally
+        if (b.x < 30) { b.x = 30; b.vx = Math.abs(b.vx) * 0.5; }
+        if (b.x > 770) { b.x = 770; b.vx = -Math.abs(b.vx) * 0.5; }
+      }
+
+      // Draw teammates
+      vb.teammates.forEach(tm => {
+        drawPlayer(tm.x, tm.y, '#e53935', 1);
+      });
+
+      // Draw opponents
+      vb.opponents.forEach(opp => {
+        drawPlayer(opp.x, opp.y, '#42a5f5', -1);
+      });
+
+      // Draw player
+      drawPlayer(p.x, p.y, '#e53935', 1);
+      // Player indicator
+      ctx.fillStyle = '#ffd54f';
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y - 42);
+      ctx.lineTo(p.x - 6, p.y - 50);
+      ctx.lineTo(p.x + 6, p.y - 50);
+      ctx.fill();
+
+      // Draw ball (volleyball)
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(b.x, b.y, 10, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#bbb';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      // Volleyball lines
+      ctx.strokeStyle = '#ccc';
+      ctx.lineWidth = 0.8;
+      ctx.beginPath(); ctx.arc(b.x, b.y, 10, 0.3, 1.2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(b.x, b.y, 10, 2.0, 2.9); ctx.stroke();
+      ctx.beginPath(); ctx.arc(b.x, b.y, 10, 3.8, 4.7); ctx.stroke();
+      // Ball shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.1)';
+      ctx.beginPath();
+      ctx.ellipse(b.x, 440, 12, 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Score display on court
+      ctx.font = '900 28px Outfit';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#e53935';
+      ctx.fillText(vb.myScore, 200, 470);
+      ctx.fillStyle = '#888';
+      ctx.fillText('-', 400, 470);
+      ctx.fillStyle = '#42a5f5';
+      ctx.fillText(vb.oppScore, 600, 470);
+
+      // Team labels
+      ctx.font = '600 12px Outfit';
+      ctx.fillStyle = '#e53935';
+      ctx.fillText('YOU', 200, 488);
+      ctx.fillStyle = '#42a5f5';
+      ctx.fillText('THEM', 600, 488);
+
+      // Message
+      if (vb.messageTimer > 0) {
+        vb.messageTimer--;
+        drawMessage(vb.message, vb.messageColor, 150);
+      }
+
+      updateScoreboard(`
+        <div class="sb-row"><span class="sb-label">Your Score</span><span class="sb-val accent">${vb.myScore}</span></div>
+        <div class="sb-row"><span class="sb-label">Their Score</span><span class="sb-val">${vb.oppScore}</span></div>
+        <div class="sb-row"><span class="sb-label">Touches</span><span class="sb-val">${vb.touches}/3</span></div>
+      `);
+    }
+
+    // Touch controls
+    canvas.addEventListener('touchstart', e => {
+      const t = e.touches[0];
+      canvas._touchX = t.clientX;
+      canvas._touchY = t.clientY;
+    });
+    canvas.addEventListener('touchmove', e => {
+      e.preventDefault();
+      const t = e.touches[0];
+      const dx = t.clientX - canvas._touchX;
+      const dy = t.clientY - canvas._touchY;
+      if (Math.abs(dx) > 8) { keys[dx > 0 ? 'ArrowRight' : 'ArrowLeft'] = true; keys[dx > 0 ? 'ArrowLeft' : 'ArrowRight'] = false; }
+      if (Math.abs(dy) > 8) { keys[dy > 0 ? 'ArrowDown' : 'ArrowUp'] = true; keys[dy > 0 ? 'ArrowUp' : 'ArrowDown'] = false; }
+      canvas._touchX = t.clientX;
+      canvas._touchY = t.clientY;
+    });
+    canvas.addEventListener('touchend', () => { keys['ArrowUp'] = keys['ArrowDown'] = keys['ArrowLeft'] = keys['ArrowRight'] = false; });
+  </script>
+</body>
+</html>
