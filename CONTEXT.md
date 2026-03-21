@@ -1,6 +1,11 @@
-# The Brothers Arcade
+# The Boys
 
-A single-file HTML5 Canvas sports arcade game built by Rob with his sons Grayson and (brother). Designed to be fun, expandable, and educational.
+Everything for Rob's sons — games, baseball stats, lineups, and whatever else comes up.
+
+## What's In Here
+
+### 1. The Brothers Arcade (`index.html`)
+A single-file HTML5 Canvas sports arcade game built by Rob with his sons. Designed to be fun, expandable, and educational. Hosted on GitHub Pages.
 
 ## Tech
 
@@ -52,11 +57,47 @@ Routing happens in three places:
 - Scoreboard panel on the right
 - Game-over overlay with restart/menu buttons
 
-## Future Ideas
+## Future Ideas (Arcade)
 
 - Homework mode: paste in math problems or spelling words
 - Custom difficulty settings per game
-- High score tracking (localStorage)
 - Multiplayer (two players on same keyboard)
 - More sports: hockey, tennis, golf
 - Sound effects
+
+### 2. Yeager Baseball (`baseball/`)
+
+Stats, lineups, and game planning for Yeager 9U (Spring 2026) and historical data from 8U (Spring 2025). Same 12 players both seasons.
+
+**Roster:** Grayson Neville, Crew Powers, Lukas Adams, Porter Mills, Alex Todd, Blake Lasita, Mason Floyd, Charlie Ruther, Owen Niemer, Blake Fristoe, Zachary Martini, Kayson Sander
+
+**Folder structure:**
+```
+baseball/
+  stats/
+    batting-2025-spring.csv    # Full season 8U stats (27 games)
+    pitching-2025-spring.csv   # Full season 8U pitching
+    batting-2026-spring.csv    # Current season 9U (running)
+    pitching-2026-spring.csv   # Current season 9U pitching
+  lineups/
+    2026-03-22-bracket-play.xlsx   # Bracket play lineups (B1 + B3)
+```
+
+**How lineup files work:**
+- Each Excel file has one sheet per game
+- Each sheet has: batting order, pitching plan, field positions by inning, bench rotation
+- Bench rules: max 2 sits per player per game, never back-to-back
+- Download fresh stats CSVs from GameChanger (Export button on team stats page)
+
+**How to build a new lineup:**
+1. Export latest stats from GameChanger
+2. Drop CSVs into `baseball/stats/`
+3. Ask Claude to analyze pitching tiers + batting order + bench rotation
+4. Save the `.xlsx` to `baseball/lineups/YYYY-MM-DD-event-name.xlsx`
+
+## Future Ideas (Baseball)
+
+- Season-long pitch count tracker
+- Player development trends (compare 2025 vs 2026 stats)
+- Automated lineup generator based on who's available
+- Tournament bracket predictor
