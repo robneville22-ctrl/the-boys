@@ -1,6 +1,8 @@
 # Coaching HQ — Architecture Plan for Yeager Baseball Portal
 
 > Technical plan for adding coaching tools to the Yeager Baseball Portal. Designed for Rob's 9U team initially, but built so any Yeager coach can use it.
+>
+> **Important:** The Yeager Baseball Portal uses **SQLite** (via Drizzle ORM's `sqliteTable`), not PostgreSQL. All table definitions below should use `sqliteTable`, `integer`, and `text` imports from `drizzle-orm/sqlite-core`. The existing schema pattern uses integer timestamps with `{ mode: "timestamp" }`.
 
 ---
 
