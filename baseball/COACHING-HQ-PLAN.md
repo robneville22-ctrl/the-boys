@@ -2,7 +2,43 @@
 
 > Technical plan for adding coaching tools to the Yeager Baseball Portal. Designed for Rob's 9U team initially, but built so any Yeager coach can use it.
 >
-> **Important:** The Yeager Baseball Portal uses **SQLite** (via Drizzle ORM's `sqliteTable`), not PostgreSQL. All table definitions below should use `sqliteTable`, `integer`, and `text` imports from `drizzle-orm/sqlite-core`. The existing schema pattern uses integer timestamps with `{ mode: "timestamp" }`.
+> **Database:** Migrating from SQLite → PostgreSQL (Supabase). See Phase 0 below.
+
+---
+
+## Phase 0 — SQLite → PostgreSQL Migration (Do First)
+
+Before building any new features, migrate the Yeager Baseball Portal from SQLite to PostgreSQL on Supabase. No data to migrate — just structural changes.
+
+### Why
+- SQLite can't handle concurrent parent/coach/admin access
+- Rob already pays for Supabase (ATS Pick'Em, robs-os) — no new cost
+- Gets us real timestamps, arrays, JSON columns, real-time subscriptions
+- Better to migrate now with ~18 tables than later with 30+
+
+### Migration Checklist
+1. **Create Supabase project** — `yeager-baseball` in Rob's existing Supabase org
+2. **Update drizzle.config.ts** — switch driver from `better-sqlite3` to `postgres` (via `drizzle-orm/postgres-js`)
+3. **Rewrite `drizzle/schema.ts`:**
+   - `sqliteTable` → `pgTable`
+   - `import { integer, text } from "drizzle-orm/sqlite-core"` → `import { serial, text, timestamp, integer, boolean } from "drizzle-orm/pg-core"`
+   - `integer("id").primaryKey({ autoIncrement: true })` → `serial("id").primaryKey()`
+   - `integer("createdAt", { mode: "timestamp" })` → `timestamp("createdAt").defaultNow().notNull()`
+   - `text("active", { enum: ["yes", "no"] })` → `boolean("active").default(true).notNull()`
+   - `text("role", { enum: [...] })` → use `pgEnum` or keep as text
+4. **Update `server/db.ts`** — swap SQLite connection for Supabase PostgreSQL connection string
+5. **Delete old migrations** — wipe `drizzle/` migration files (no data to preserve)
+6. **Generate fresh migration** — `npx drizzle-kit generate` from the new schema
+7. **Push migration** — `npx drizzle-kit push` to Supabase
+8. **Update environment** — add `DATABASE_URL` from Supabase project settings
+9. **Update deployment** — move from Manus to Vercel (consistent with all other projects)
+10. **Test all existing features** — registration, parent portal, admin dashboard, schedule
+
+### Packages to swap
+```
+Remove: better-sqlite3, @types/better-sqlite3
+Add: postgres (or pg), drizzle-orm/postgres-js
+```
 
 ---
 
