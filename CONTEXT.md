@@ -33,12 +33,13 @@ Routing happens in three places:
 2. **Football Pass** (`fb`) — QB with receivers, OL blocking, defenders
 3. **Football Run** (`fr`) — running back dodges defenders to end zone
 4. **Football Defense** (`fd`) — play as defender, tackle the runner
-5. **Basketball** (`bk`) — move + shoot with shot meter, teammates + defenders
-6. **Soccer** (`sc`) — dribble + shoot with power meter, goalie + defenders
-7. **Math** (`mt`) — pick operation + time limit, vertical problem display, 4 choices
-8. **Running** (`rn`) — hold-to-run sprint races, pick 50m/100m/150m
-9. **Dodgeball** (`db`) — two teams, throw + dodge
-10. **Volleyball** (`vb`) — beach volleyball, bump/set/spike
+5. **Football Coverage** (`cv`) — play CB, cover WR routes, break up passes
+6. **Basketball** (`bk`) — move + shoot with shot meter, teammates + defenders
+7. **Soccer** (`sc`) — dribble + shoot with power meter, goalie + defenders
+8. **Math** (`mt`) — pick operation + time limit, vertical problem display, 4 choices
+9. **Running** (`rn`) — hold-to-run sprint races, pick 50m/100m/150m
+10. **Dodgeball** (`db`) — two teams, throw + dodge
+11. **Volleyball** (`vb`) — beach volleyball, bump/set/spike
 
 ## Adding a New Game
 
@@ -65,39 +66,41 @@ Routing happens in three places:
 - More sports: hockey, tennis, golf
 - Sound effects
 
-### 2. Yeager Baseball (`baseball/`)
+### 2. Coaching HQ (`baseball/`)
 
-Stats, lineups, and game planning for Yeager 9U (Spring 2026) and historical data from 8U (Spring 2025). Same 12 players both seasons.
+Full coaching command center for Jaegers 9U (Yeager Baseball, Cincinnati OH) — Spring 2026 season. See `baseball/COACHING-HQ.md` for the complete system and `CLAUDE.md` for processing instructions.
 
-**Roster:** Grayson Neville, Crew Powers, Lukas Adams, Porter Mills, Alex Todd, Blake Lasita, Mason Floyd, Charlie Ruther, Owen Niemer, Blake Fristoe, Zachary Martini, Kayson Sander
+**Roster (12 players):** Grayson Neville (#1), Crew Powers (#2), Lukas Adams (#3), Porter Mills (#6), Alex Todd (#9), Blake Lasita (#10), Mason Floyd (#11), Charlie Ruther (#15), Owen Niemer (#17), Blake Fristoe (#19), Zachary Martini (#21), Kayson Sander (#56)
 
-**Folder structure:**
-```
-baseball/
-  stats/
-    batting-2025-spring.csv    # Full season 8U stats (27 games)
-    pitching-2025-spring.csv   # Full season 8U pitching
-    batting-2026-spring.csv    # Current season 9U (running)
-    pitching-2026-spring.csv   # Current season 9U pitching
-  lineups/
-    2026-03-22-bracket-play.xlsx   # Bracket play lineups (B1 + B3)
-```
+**What's in here:**
+- Game notes (from Plaud Note Pin S recordings)
+- Player development profiles (updated after each game)
+- Practice plans (with drill references)
+- Game prep / scouting reports
+- Season analytics (power rankings, tiers, splits)
+- Pitch count tracker (arm health)
+- Drill library (24 drills with web references)
+- GameChanger CSV stat exports
+- Lineup spreadsheets
+- Reusable templates for all document types
+- Architecture plan for Yeager Baseball Portal integration
 
-**How lineup files work:**
-- Each Excel file has one sheet per game
-- Each sheet has: batting order, pitching plan, field positions by inning, bench rotation
-- Bench rules: max 2 sits per player per game, never back-to-back
-- Download fresh stats CSVs from GameChanger (Export button on team stats page)
+**Repeatable workflow:**
+1. Record game with Plaud Note Pin S
+2. Export Plaud transcript + GameChanger CSVs
+3. Paste into Claude Code → auto-generates all coaching docs
 
-**How to build a new lineup:**
-1. Export latest stats from GameChanger
-2. Drop CSVs into `baseball/stats/`
-3. Ask Claude to analyze pitching tiers + batting order + bench rotation
-4. Save the `.xlsx` to `baseball/lineups/YYYY-MM-DD-event-name.xlsx`
+## Future Ideas
 
-## Future Ideas (Baseball)
+### Arcade
+- Homework mode: paste in math problems or spelling words
+- Custom difficulty settings per game
+- Multiplayer (two players on same keyboard)
+- More sports: hockey, tennis, golf
+- Sound effects
 
-- Season-long pitch count tracker
-- Player development trends (compare 2025 vs 2026 stats)
-- Automated lineup generator based on who's available
+### Baseball / Coaching
+- Integration with Yeager Baseball Portal (see `baseball/COACHING-HQ-PLAN.md`)
+- Open Brain MCP integration for semantic search across coaching observations
+- Automated lineup generator based on availability + stats
 - Tournament bracket predictor

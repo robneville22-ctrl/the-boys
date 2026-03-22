@@ -1,2 +1,10 @@
 .DS_Store
 .claude/
+~$*
+
+# Media files (too large for git)
+baseball/media/photos/*
+baseball/media/videos/*
+!baseball/media/README.md
+!baseball/media/photos/.gitkeep
+!baseball/media/videos/.gitkeep

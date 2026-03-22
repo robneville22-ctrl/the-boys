@@ -358,6 +358,9 @@
       <button class="game-btn" onclick="startFootballMode('defense')">
         <span class="icon">&#128737;</span>Defense
       </button>
+      <button class="game-btn" onclick="startFootballMode('coverage')">
+        <span class="icon">&#127944;</span>1-on-1 Coverage
+      </button>
     </div>
   </div>
 
@@ -403,6 +406,7 @@
 
   <!-- High Scores Dashboard -->
   <div id="dashboard">
+    <button onclick="closeDashboard()" style="position:sticky; top:0; align-self:flex-start; background:#1a1a2e; border:1px solid #e5393555; color:#e8e8ec; font-family:'Outfit',sans-serif; font-size:15px; font-weight:700; padding:10px 24px; border-radius:10px; cursor:pointer; z-index:5; margin-bottom:12px;">← Back</button>
     <h2>🏆 HIGH SCORES</h2>
     <div class="dash-sub">Your all-time bests</div>
     <div class="dash-grid" id="dash-grid"></div>
@@ -438,6 +442,7 @@
       football: { name: 'Football (Pass)', icon: '🏈' },
       football_run: { name: 'Football (Run)', icon: '🏃' },
       football_defense: { name: 'Football (Defense)', icon: '🛡️' },
+      football_coverage: { name: 'Football (Coverage)', icon: '🏈' },
       basketball: { name: 'Basketball', icon: '🏀' },
       soccer: { name: 'Soccer', icon: '⚽' },
       math: { name: 'Math', icon: '🧮' },
@@ -548,6 +553,7 @@
       else if (game === 'football') initFootball();
       else if (game === 'football_run') initFootballRun();
       else if (game === 'football_defense') initFootballDefense();
+      else if (game === 'football_coverage') initFootballCoverage();
       else if (game === 'basketball') initBasketball();
       else if (game === 'soccer') initSoccer();
       else if (game === 'math') initMath();
@@ -605,6 +611,7 @@
       else if (currentGame === 'football') updateFootball();
       else if (currentGame === 'football_run') updateFootballRun();
       else if (currentGame === 'football_defense') updateFootballDefense();
+      else if (currentGame === 'football_coverage') updateFootballCoverage();
       else if (currentGame === 'basketball') updateBasketball();
       else if (currentGame === 'soccer') updateSoccer();
       else if (currentGame === 'math') updateMath();
@@ -622,6 +629,7 @@
       if (currentGame === 'basketball') clickBasketball(x, y);
       if (currentGame === 'football') clickFootball(x, y);
       if (currentGame === 'football_defense') clickFootballDefense(x, y);
+      if (currentGame === 'football_coverage') clickFootballCoverage(x, y);
       if (currentGame === 'soccer') clickSoccer(x, y);
       if (currentGame === 'math') clickMath(x, y);
       if (currentGame === 'running') clickRunning(x, y);
@@ -2081,6 +2089,7 @@
       if (mode === 'pass') startGame('football');
       else if (mode === 'run') startGame('football_run');
       else if (mode === 'defense') startGame('football_defense');
+      else if (mode === 'coverage') startGame('football_coverage');
     }
     function showMathSetup() {
       document.getElementById('math-setup').style.display = 'flex';
@@ -2354,6 +2363,236 @@
     }
 
     // ============================================================
+    // FOOTBALL — 1-on-1 Coverage! Play CB vs WR!
+    // ============================================================
+    let cv = {};
+    function initFootballCoverage() {
+      document.getElementById('instructions').textContent = 'Arrow keys to move with the WR. Click to swat when the ball comes!';
+      timeLeft = 45;
+      cv = {
+        player: { x: 600, y: 250, speed: 4.2 }, // CB (you)
+        wr: { x: 620, y: 250, speed: 4.5 },     // WR (AI)
+        ball: null,       // { x, y, targetX, targetY, speed } when thrown
+        phase: 'route',   // 'route' | 'thrown' | 'reset'
+        routeTimer: 0,
+        routePoints: [],  // WR runs a route
+        routeIdx: 0,
+        resetTimer: 0,
+        breakups: 0,
+        catches: 0,
+        attempts: 0,
+        message: '', messageTimer: 0, messageColor: '#66bb6a',
+      };
+      setupRoute();
+    }
+
+    function setupRoute() {
+      cv.attempts++;
+      // WR lines up on right side, runs a route
+      const routes = [
+        // Go route (straight deep)
+        [{x: 600, y: 130}, {x: 580, y: 80}],
+        // Slant
+        [{x: 580, y: 230}, {x: 400, y: 180}],
+        // Out route
+        [{x: 580, y: 250}, {x: 580, y: 130}, {x: 700, y: 130}],
+        // Curl
+        [{x: 560, y: 180}, {x: 560, y: 160}, {x: 580, y: 200}],
+        // Post
+        [{x: 560, y: 200}, {x: 400, y: 120}],
+        // Corner route
+        [{x: 560, y: 200}, {x: 680, y: 100}],
+        // Dig / In route
+        [{x: 560, y: 250}, {x: 560, y: 180}, {x: 380, y: 180}],
+        // Comeback
+        [{x: 560, y: 150}, {x: 580, y: 200}],
+      ];
+      const route = routes[Math.floor(Math.random() * routes.length)];
+      cv.wr.x = 620; cv.wr.y = 250;
+      cv.player.x = 640; cv.player.y = 250;
+      cv.routePoints = route;
+      cv.routeIdx = 0;
+      cv.routeTimer = 60 + Math.floor(Math.random() * 30); // snap delay
+      cv.phase = 'route';
+      cv.ball = null;
+      cv.resetTimer = 0;
+    }
+
+    function clickFootballCoverage(mx, my) {
+      if (cv.phase === 'thrown' && cv.ball) {
+        const p = cv.player;
+        const b = cv.ball;
+        const dist = Math.sqrt((p.x - b.x) ** 2 + (p.y - b.y) ** 2);
+        if (dist < 55) {
+          cv.breakups++;
+          score += 4;
+          cv.message = 'PASS BREAKUP!';
+          cv.messageColor = '#66bb6a';
+          cv.messageTimer = 50;
+          cv.phase = 'reset';
+          cv.resetTimer = 60;
+          cv.ball = null;
+          updateHUD();
+        }
+      }
+    }
+
+    function updateFootballCoverage() {
+      const p = cv.player;
+      const wr = cv.wr;
+
+      // Player (CB) movement
+      if (keys['ArrowUp'] || keys['w']) p.y -= p.speed;
+      if (keys['ArrowDown'] || keys['s']) p.y += p.speed;
+      if (keys['ArrowLeft'] || keys['a']) p.x -= p.speed;
+      if (keys['ArrowRight'] || keys['d']) p.x += p.speed;
+      p.x = Math.max(10, Math.min(790, p.x));
+      p.y = Math.max(60, Math.min(440, p.y));
+
+      drawFootballField();
+
+      // Draw line of scrimmage
+      ctx.strokeStyle = '#42a5f5';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([8, 6]);
+      ctx.beginPath(); ctx.moveTo(0, 265); ctx.lineTo(800, 265); ctx.stroke();
+      ctx.setLineDash([]);
+
+      if (cv.phase === 'route') {
+        // Pre-snap countdown
+        if (cv.routeTimer > 0) {
+          cv.routeTimer--;
+          // Draw WR and CB at line
+          drawPlayer(wr.x, wr.y, '#e53935', -1);
+          drawHelmet(wr.x, wr.y, '#e53935');
+          drawDefender(p.x, p.y, '#2255aa');
+          drawHelmet(p.x, p.y, '#2255aa');
+          // "SET" text
+          if (cv.routeTimer > 20) {
+            ctx.fillStyle = '#ffd54f';
+            ctx.font = 'bold 28px Outfit';
+            ctx.textAlign = 'center';
+            ctx.fillText('SET...', 400, 300);
+          } else {
+            ctx.fillStyle = '#66bb6a';
+            ctx.font = 'bold 32px Outfit';
+            ctx.textAlign = 'center';
+            ctx.fillText('HIKE!', 400, 300);
+          }
+          return;
+        }
+
+        // WR runs the route
+        if (cv.routeIdx < cv.routePoints.length) {
+          const target = cv.routePoints[cv.routeIdx];
+          const dx = target.x - wr.x;
+          const dy = target.y - wr.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 5) {
+            cv.routeIdx++;
+          } else {
+            wr.x += (dx / dist) * wr.speed;
+            wr.y += (dy / dist) * wr.speed;
+          }
+        }
+
+        // Once route is done, QB throws
+        if (cv.routeIdx >= cv.routePoints.length) {
+          // Throw the ball from QB position
+          cv.ball = { x: 200, y: 260, speed: 6 };
+          cv.phase = 'thrown';
+        }
+      }
+
+      if (cv.phase === 'thrown' && cv.ball) {
+        const b = cv.ball;
+        // Ball flies toward WR's current position
+        const dx = wr.x - b.x;
+        const dy = wr.y - b.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 8) {
+          // Ball arrived — did CB break it up?
+          const cbDist = Math.sqrt((p.x - wr.x) ** 2 + (p.y - wr.y) ** 2);
+          if (cbDist < 40) {
+            cv.breakups++;
+            score += 4;
+            cv.message = 'TIGHT COVERAGE!';
+            cv.messageColor = '#66bb6a';
+            cv.messageTimer = 50;
+            updateHUD();
+          } else {
+            cv.catches++;
+            cv.message = 'CATCH ALLOWED!';
+            cv.messageColor = '#e53935';
+            cv.messageTimer = 50;
+          }
+          cv.phase = 'reset';
+          cv.resetTimer = 70;
+          cv.ball = null;
+        } else {
+          b.x += (dx / dist) * b.speed;
+          b.y += (dy / dist) * b.speed;
+        }
+      }
+
+      if (cv.phase === 'reset') {
+        cv.resetTimer--;
+        if (cv.resetTimer <= 0) setupRoute();
+      }
+
+      // Draw WR (red)
+      drawPlayer(wr.x, wr.y, '#e53935', -1);
+      drawHelmet(wr.x, wr.y, '#e53935');
+
+      // Draw CB (you — blue)
+      drawDefender(p.x, p.y, '#2255aa');
+      drawHelmet(p.x, p.y, '#2255aa');
+
+      // Draw ball if in flight
+      if (cv.ball) {
+        ctx.fillStyle = '#8B4513';
+        ctx.beginPath();
+        ctx.ellipse(cv.ball.x, cv.ball.y, 10, 6, 0.3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(cv.ball.x - 3, cv.ball.y - 4);
+        ctx.lineTo(cv.ball.x + 3, cv.ball.y + 4);
+        ctx.stroke();
+      }
+
+      // Proximity indicator — glow when close to WR
+      const distToWR = Math.sqrt((p.x - wr.x) ** 2 + (p.y - wr.y) ** 2);
+      if (distToWR < 60 && cv.phase !== 'reset') {
+        ctx.strokeStyle = `rgba(100, 255, 100, ${0.3 + Math.sin(Date.now() / 150) * 0.15})`;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(wr.x, wr.y, 35, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      // Draw QB (just a static figure on the left)
+      if (cv.phase !== 'reset') {
+        drawPlayer(200, 260, '#e53935', 1);
+        drawHelmet(200, 260, '#e53935');
+      }
+
+      if (cv.messageTimer > 0) {
+        cv.messageTimer--;
+        drawMessage(cv.message, cv.messageColor, 100);
+      }
+
+      const rate = cv.attempts > 0 ? Math.round((cv.breakups / cv.attempts) * 100) : 0;
+      updateScoreboard(`
+        <div class="sb-row"><span class="sb-label">Breakups</span><span class="sb-val accent">${cv.breakups}</span></div>
+        <div class="sb-row"><span class="sb-label">Catches</span><span class="sb-val">${cv.catches}</span></div>
+        <div class="sb-row"><span class="sb-label">Plays</span><span class="sb-val">${cv.attempts}</span></div>
+        <div class="sb-row"><span class="sb-label">Coverage %</span><span class="sb-val">${rate}%</span></div>
+      `);
+    }
+
+    // ============================================================
     // MATH — 3rd grade math challenge!
     // ============================================================
     let mt = {};
@@ -2611,10 +2850,10 @@
       rn = {
         player: { x: 80, y: 250, speed: 0 },
         opponents: [
-          { x: 80, y: 150, speed: 0, baseSpeed: 2.4, color: '#42a5f5', name: 'Blue' },
-          { x: 80, y: 200, speed: 0, baseSpeed: 2.8, color: '#ffd54f', name: 'Gold' },
-          { x: 80, y: 300, speed: 0, baseSpeed: 3.1, color: '#ab47bc', name: 'Purple' },
-          { x: 80, y: 350, speed: 0, baseSpeed: 2.6, color: '#26a69a', name: 'Teal' },
+          { x: 80, y: 150, speed: 0, baseSpeed: 4.2, color: '#42a5f5', name: 'Blue' },
+          { x: 80, y: 200, speed: 0, baseSpeed: 4.6, color: '#ffd54f', name: 'Gold' },
+          { x: 80, y: 300, speed: 0, baseSpeed: 4.9, color: '#ab47bc', name: 'Purple' },
+          { x: 80, y: 350, speed: 0, baseSpeed: 4.4, color: '#26a69a', name: 'Teal' },
         ],
         races: 0, wins: 0,
         raceActive: true,
