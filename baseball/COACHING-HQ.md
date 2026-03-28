@@ -143,11 +143,31 @@ baseball/
 - [ ] Strike zone target for pitching accuracy drill
 - [ ] Tape roll for front foot direction drill
 
-## Future Vision: Yeager Baseball Portal Integration
-Full technical plan in `COACHING-HQ-PLAN.md`. The portal at `/Users/Rob/Projects/Yeager Baseball/` will get:
-- **Phase A:** Coach login (magic link auth)
-- **Phase B:** Player profiles + game notes (highest value)
-- **Phase C:** Drill library + practice plan builder
-- **Phase D:** Stats import + season dashboard
+## Yeager Baseball Portal Integration
 
-This turns the admin portal into a real coaching platform.
+The portal is **LIVE** at https://yeager-baseball.vercel.app (deployed 3/23, PostgreSQL on Supabase, magic link auth). Full technical plan in `COACHING-HQ-PLAN.md`.
+
+**What's done:**
+- ✅ Phase 0: SQLite → PostgreSQL migration (18 `yb_` tables + 9 enums on shared Supabase)
+- ✅ Vercel deployment with serverless API
+- ✅ Parent magic link auth + coach login working (Rob logged in 3/25)
+- ✅ Admin authorization hardened
+- ✅ SKILL.md design system enforced (Outfit font, Phosphor icons, tinted shadows, 20+ files updated)
+- ✅ Drill Library — 24 drills seeded from `drill-library.md` into portal DB, searchable UI at `/coaching/drills`
+- ✅ Practice Plans — create/edit with station builder at `/coaching/practice`
+
+**What's next:**
+- **Player Roster page** — Data exists in `roster.md` (12 players), schema exists (`yb_coaching_players`), needs seed script + UI page at `/coaching/players`
+- **Game Notes page** — Sidebar link exists but no UI yet
+- **Stats import** — GameChanger CSVs ready, `yb_stat_imports` table exists
+- **Deploy to production** — Coaching pages + design changes need to be pushed to Vercel
+
+**This markdown system stays as Rob's personal coaching notebook.** The portal becomes the shared version for all Yeager coaches. No rush to merge — the markdown workflow is faster for Rob's AI-powered game processing.
+
+## Open Brain Integration
+
+Rob's "second brain" MCP server at `/Users/Rob/Projects/open-brain/`. Codex built a Plaud transcript import pipeline (3/24) that extracts structured notes from recordings and stores them with embeddings for semantic search.
+
+**Status:** Code complete, NOT yet runnable — needs `.env` file with API keys.
+**Next step:** Create `.env` → test with `--dry-run` on a Plaud transcript → `--commit` to start building the brain.
+**How it connects:** Plaud game recordings can be imported into Open Brain for unstructured semantic search, while the structured game processing still flows through this Coaching HQ markdown system.

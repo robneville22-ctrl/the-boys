@@ -59,6 +59,11 @@ When Rob says "process game notes" with a Plaud transcript:
 6. Create next game prep from `templates/game-prep-template.md`
 7. Update `COACHING-HQ.md` season record and team stats
 
+## Yeager Baseball Portal (Separate Repo)
+The Yeager Baseball Portal is a separate web app at `/Users/Rob/Projects/Yeager Baseball/`, LIVE at https://yeager-baseball.vercel.app. It handles registration, parent portal, admin dashboard, and schedule for the whole Yeager org.
+
+The coaching HQ markdown system in `baseball/` stays **separate** from the portal — different audiences, different UX. See `baseball/COACHING-HQ-PLAN.md` for the phased integration plan (Phase 0 done, Phases A-D planned but not started).
+
 ## Conventions
 - Keep arcade games in the single index.html (no splitting)
 - Baseball files use markdown — designed for Claude Code processing, not a web UI

@@ -2,108 +2,79 @@
 
 > Technical plan for adding coaching tools to the Yeager Baseball Portal. Designed for Rob's 9U team initially, but built so any Yeager coach can use it.
 >
-> **Database:** Migrating from SQLite → PostgreSQL (Supabase). See Phase 0 below.
+> **Portal:** LIVE at https://yeager-baseball.vercel.app
+> **Database:** PostgreSQL on shared Supabase (18 `yb_` tables + 9 enums)
+> **Auth:** Magic link only (password + OAuth removed)
+>
+> Last updated: 2026-03-24
 
 ---
 
-## Phase 0 — SQLite → PostgreSQL Migration (Do First)
+## Phase 0 — SQLite → PostgreSQL Migration ✅ COMPLETE
 
-Before building any new features, migrate the Yeager Baseball Portal from SQLite to PostgreSQL on Supabase. No data to migrate — just structural changes.
+Completed 2026-03-23. The portal is now running PostgreSQL on the shared Supabase instance.
 
-### Why
-- SQLite can't handle concurrent parent/coach/admin access
-- Rob already pays for Supabase (ATS Pick'Em, robs-os) — no new cost
-- Gets us real timestamps, arrays, JSON columns, real-time subscriptions
-- Better to migrate now with ~18 tables than later with 30+
+### What was done
+- Rewrote all 18 tables from `sqliteTable` → `pgTable` in `drizzle/schema.ts`
+- All tables prefixed with `yb_` (shares Supabase with ATS Pick'Em + Rob's OS)
+- Converted: booleans (integer → real boolean), timestamps (integer → timestamp), enums (text → pgEnum)
+- Swapped `better-sqlite3` → `postgres` (postgres.js driver)
+- Schema pushed to live Supabase via MCP (6 migrations, all 18 tables confirmed)
+- Deployed to Vercel with Build Output API v3 (esbuild-bundled serverless function)
+- Magic link auth consolidated (password auth + OAuth removed by Codex C5/C6)
+- Admin routes hardened with `adminProcedure` (Codex C1)
+- 12 tests passing, 1 skipped (DB-backed tests hit live Supabase)
 
-### Migration Checklist
-1. **Create Supabase project** — `yeager-baseball` in Rob's existing Supabase org
-2. **Update drizzle.config.ts** — switch driver from `better-sqlite3` to `postgres` (via `drizzle-orm/postgres-js`)
-3. **Rewrite `drizzle/schema.ts`:**
-   - `sqliteTable` → `pgTable`
-   - `import { integer, text } from "drizzle-orm/sqlite-core"` → `import { serial, text, timestamp, integer, boolean } from "drizzle-orm/pg-core"`
-   - `integer("id").primaryKey({ autoIncrement: true })` → `serial("id").primaryKey()`
-   - `integer("createdAt", { mode: "timestamp" })` → `timestamp("createdAt").defaultNow().notNull()`
-   - `text("active", { enum: ["yes", "no"] })` → `boolean("active").default(true).notNull()`
-   - `text("role", { enum: [...] })` → use `pgEnum` or keep as text
-4. **Update `server/db.ts`** — swap SQLite connection for Supabase PostgreSQL connection string
-5. **Delete old migrations** — wipe `drizzle/` migration files (no data to preserve)
-6. **Generate fresh migration** — `npx drizzle-kit generate` from the new schema
-7. **Push migration** — `npx drizzle-kit push` to Supabase
-8. **Update environment** — add `DATABASE_URL` from Supabase project settings
-9. **Update deployment** — move from Manus to Vercel (consistent with all other projects)
-10. **Test all existing features** — registration, parent portal, admin dashboard, schedule
-
-### Packages to swap
-```
-Remove: better-sqlite3, @types/better-sqlite3
-Add: postgres (or pg), drizzle-orm/postgres-js
-```
+### Current infrastructure
+- **Hosting:** Vercel (auto-deploys from `main` branch)
+- **Database:** Supabase PostgreSQL (pooler URL, same instance as other projects)
+- **Build:** `scripts/build-vercel.mjs` — Vite frontend + esbuild API bundle → Build Output API v3
+- **API:** Single serverless function wrapping Express (tRPC + 3 custom routes)
+- **Auth:** Admin cookie auth + parent magic link today; moving to unified magic-link accounts/roles per `Yeager Baseball/REDESIGN.md`
+- **Email:** Gmail SMTP via nodemailer (auth verified, end-to-end delivery not yet confirmed)
 
 ---
 
 ## Overview
 
-Add a `/coaching/*` section to the Yeager Baseball Portal with its own auth, dashboard, and tools. Coaches log in via magic link (like parents already do), and get a dedicated workspace for managing their team.
+Add a `/coaching/*` section to the Yeager Baseball Portal with a dedicated dashboard and tools inside the unified role-based portal. Coaches become another role in the shared auth system rather than a separate auth silo.
 
 ---
 
-## Phase A — Foundation (Build First)
+## Phase A — Foundation ✅ SUPERSEDED BY UNIFIED PORTAL REDESIGN
 
-### Coach Authentication
-Mirrors the parent auth pattern (magic link → session cookie). Coaches already exist in the `coaches` table with email addresses.
+> **UPDATE (3/23):** Phase A's separate coach auth system has been replaced by a unified portal redesign. See `Yeager Baseball/REDESIGN.md` for the full plan.
+>
+> Instead of 3 separate auth systems (admin, parent, coach), the portal will use **one `yb_accounts` table** with a `roles` column. Coach auth is just another role — no separate tables needed.
+>
+> The separate `yb_coachAccounts`, `yb_coachSessions`, `yb_coachLoginTokens` tables below are **no longer needed**.
 
-**New tables:**
+### What Changed
+- Single `/login` page for everyone (not `/coaching/login`)
+- Single `yeager_session` cookie (not `yeager_coach_session`)
+- `yb_accounts.roles` = `"coach"` or `"admin,coach"` (not separate tables)
+- `coachProcedure` middleware reads `coachId` from the unified account
+- Coach features live at `/coaching/*` within the shared `PortalLayout` sidebar
 
-```
-coachAccounts
-├── id (PK)
-├── coachId → coaches.id
-├── email (unique)
-├── createdAt
-└── lastLoginAt
+### Original Plan (kept for reference)
 
-coachSessions
-├── id (PK)
-├── coachAccountId → coachAccounts.id
-├── sessionToken (unique)
-├── expiresAt (30 days)
-└── createdAt
+The original plan called for separate coach auth tables mirroring the parent system. This was reasonable when the portal had separate login flows, but the unified redesign makes it unnecessary.
 
-coachLoginTokens
-├── id (PK)
-├── email
-├── token (unique, one-time-use)
-├── coachId
-├── expiresAt (15 min)
-├── usedAt
-└── createdAt
-```
-
-**Auth flow:**
-1. Coach visits `/coaching/login`, enters email
-2. Server checks `coaches` table — if found and active, sends magic link
-3. Coach clicks link → session created → `yeager_coach_session` cookie set
-4. All coaching routes protected by `coachProcedure` middleware
-
-**New routes:**
-- `/coaching/login` — Email input
-- `/coaching/verify?token=xxx` — Magic link landing
-- `/coaching` — Dashboard (after login)
-
-**Deliverable:** Coach can log in and see an empty dashboard.
+**Deliverable (unchanged):** Coach can log in and see their coaching dashboard.
 
 ---
 
-## Phase B — Player Profiles + Game Notes (Highest Value)
+## Phase B — Player Profiles + Game Notes (Highest Value) — PARTIALLY COMPLETE
+
+> **Status (3/24):** Player roster page and seed script DONE. 12 players imported from `roster.md` with full stat lines, attention levels, strengths, weaknesses, coaching notes. Route live at `/coaching/players`. Game notes UI still TODO.
 
 ### Player Development Profiles
-The coach's working view of their roster. Separate from the registration table (different purpose).
+The coach's working view of their roster. Separate from the `yb_registrations` table (different purpose — registration is legal/admin data, this is the coach's working view).
 
 ```
-coachingPlayers
-├── id (PK)
-├── coachId → coaches.id
+yb_coachingPlayers
+├── id (PK, serial)
+├── coachId → yb_coaches.id
 ├── name
 ├── jerseyNumber
 ├── position (primary)
@@ -120,9 +91,9 @@ coachingPlayers
 One record per game, with per-player breakdowns.
 
 ```
-gameNotes
-├── id (PK)
-├── coachId → coaches.id
+yb_gameNotes
+├── id (PK, serial)
+├── coachId → yb_coaches.id
 ├── gameDate
 ├── opponent
 ├── result ("win" / "loss" / "tie")
@@ -135,10 +106,10 @@ gameNotes
 ├── createdAt
 └── updatedAt
 
-gamePlayerNotes
-├── id (PK)
-├── gameNoteId → gameNotes.id
-├── playerId → coachingPlayers.id
+yb_gamePlayerNotes
+├── id (PK, serial)
+├── gameNoteId → yb_gameNotes.id
+├── playerId → yb_coachingPlayers.id
 ├── observations (text)
 ├── areasToImprove (text)
 └── createdAt
@@ -155,14 +126,14 @@ gamePlayerNotes
 
 ---
 
-## Phase C — Drill Library + Practice Plans
+## Phase C — Drill Library + Practice Plans — ✅ COMPLETE
 
 ### Drill Library
 Reusable drill definitions. Some are global (seeded), some are coach-created.
 
 ```
-drills
-├── id (PK)
+yb_drills
+├── id (PK, serial)
 ├── name
 ├── description (how to run it)
 ├── category ("hitting" / "fielding" / "baserunning" / "pitching" / "catching" / "warmup")
@@ -178,9 +149,9 @@ drills
 Structured plans with time-allocated stations.
 
 ```
-practicePlans
-├── id (PK)
-├── coachId → coaches.id
+yb_practicePlans
+├── id (PK, serial)
+├── coachId → yb_coaches.id
 ├── practiceDate
 ├── title
 ├── durationMinutes
@@ -188,10 +159,10 @@ practicePlans
 ├── createdAt
 └── updatedAt
 
-practicePlanStations
-├── id (PK)
-├── practicePlanId → practicePlans.id
-├── drillId → drills.id (nullable for ad-hoc)
+yb_practicePlanStations
+├── id (PK, serial)
+├── practicePlanId → yb_practicePlans.id
+├── drillId → yb_drills.id (nullable for ad-hoc)
 ├── stationName
 ├── durationMinutes
 ├── sortOrder
@@ -208,7 +179,13 @@ practicePlanStations
 
 **Key feature:** `duplicate` mutation — copy an existing practice plan to a new date and tweak it. Coaches reuse structures week to week.
 
-**Seed data:** ~24 drills from the drill-library.md already written.
+**Seed data:** All 24 drills seeded into `yb_drills` via `scripts/seed-drills.ts`. ✅
+
+> **Status (3/24):** All Phase C UI pages and seed scripts DONE.
+> - `/coaching/drills` — Drill library with category filters + search (DrillLibrary.tsx)
+> - `/coaching/practice` — Practice plans list with duplicate/delete (PracticePlans.tsx)
+> - `/coaching/practice/:id` and `/coaching/practice/new` — Plan builder with station management (PracticePlanDetail.tsx)
+> - `scripts/seed-drills.ts` — 24 drills seeded from drill-library.md
 
 ---
 
@@ -218,9 +195,9 @@ practicePlanStations
 Upload GameChanger CSV exports, parse server-side, store as JSON blob.
 
 ```
-statImports
-├── id (PK)
-├── coachId → coaches.id
+yb_statImports
+├── id (PK, serial)
+├── coachId → yb_coaches.id
 ├── filename
 ├── s3Key
 ├── importType ("batting" / "pitching")
@@ -321,13 +298,32 @@ Shared: `CoachingLayout.tsx` (sidebar nav) + `CoachAuthGuard.tsx` (session check
 ---
 
 ## Prerequisites
-1. **Email must work** — Magic link auth requires SMTP. This is already top priority in TASKS.md.
-2. **Rob's coach email must be set** in the `coaches` table
-3. **S3 access** — Already configured (used for birth certificates)
+1. ✅ **Database on PostgreSQL** — Done. 18 `yb_` tables live on shared Supabase.
+2. ✅ **Deployed to Vercel** — Done. Auto-deploys from `main`.
+3. ✅ **Magic link auth pattern proven** — Parent magic link works in prod. Coach auth will clone this pattern.
+4. ⚠️ **Email end-to-end delivery** — SMTP auth verified but nobody has confirmed a real email arrives in an inbox yet. Must verify before coach magic links will work.
+5. **Rob's coach email must be set** in the `yb_coaches` table
+6. **S3 access** — Already configured (used for birth certificates)
 
 ## Design Decisions
 - **Separate coach auth from admin auth** — Different roles, different permissions. A coach can't accidentally access admin functions.
-- **`coachingPlayers` is separate from `registrations`** — Registration is legal/admin data. Coaching players is the coach's working roster view.
-- **Magic link over password** — Only ~13 coaches. Simpler, more secure, matches parent pattern.
-- **JSON blobs for flexible data** — Stats, observations, and improvement areas stored as JSON text. Avoids premature schema complexity.
+- **`yb_coachingPlayers` is separate from `yb_registrations`** — Registration is legal/admin data. Coaching players is the coach's working roster view.
+- **Magic link over password** — Only ~13 coaches. Simpler, more secure, matches parent pattern (password auth was already removed from the portal in C5/C6).
+- **JSON blobs for flexible data** — Stats, observations, and improvement areas stored as JSON text. Avoids premature schema complexity. PostgreSQL's native JSON support makes this cleaner than the old SQLite text approach.
 - **Practice plan duplication** — Coaches reuse plans weekly. One-click copy to new date.
+- **`yb_` table prefix** — All Yeager Baseball tables use this prefix to coexist with Rob's OS and ATS Pick'Em tables in the shared Supabase instance.
+
+## Relationship to Coaching HQ (this repo)
+
+The markdown-based Coaching HQ in `the-boys/baseball/` and the Yeager Baseball Portal serve **different purposes**:
+
+| | Coaching HQ (this repo) | Yeager Portal |
+|---|---|---|
+| **Audience** | Rob only | All coaches, parents, admins |
+| **Format** | Markdown files + Claude Code | Web app (React + tRPC) |
+| **Data** | Plaud transcripts, CSVs, notes | Database (PostgreSQL) |
+| **Best for** | Quick capture, AI processing | Shared access, structured data |
+
+**Keep them separate for now.** The markdown system is faster for Rob's personal workflow. When the portal's coaching features are built (Phases A-D above), the portal becomes the shared version that any Yeager coach can use — and the markdown system stays as Rob's personal notebook / AI processing pipeline.
+
+**Migration path:** When Phase B is built, Rob can optionally import his existing player profiles and game notes from the markdown files into the portal's database. The markdown files remain the source of truth until then.
