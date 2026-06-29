@@ -1,4 +1,4 @@
-# Pitch Count Tracker — Jaegers 9U Spring 2026
+# Pitch Count Tracker — Yeager 9U Spring 2026
 
 > Track cumulative pitch counts to manage arm health. League limit: ~55 pitches per game (can finish the batter). Watch for fatigue around 30 pitches.
 

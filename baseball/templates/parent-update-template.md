@@ -1,6 +1,6 @@
 # Weekly Parent Update — [DATE]
 
-Hey Jaegers families!
+Hey Yeager families!
 
 ## This Week's Results
 - **[Date]** vs [Opponent] — [Result] ([Score])
@@ -26,5 +26,5 @@ Hey Jaegers families!
 [Brief positive message about the team's progress and attitude]
 
 ---
-Go Jaegers!
+Go Yeager!
 Coach Rob

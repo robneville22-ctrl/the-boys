@@ -8,3 +8,8 @@ baseball/media/videos/*
 !baseball/media/README.md
 !baseball/media/photos/.gitkeep
 !baseball/media/videos/.gitkeep
+*.lock
+.~lock.*#
+*.tsbuildinfo
+.tmp/
+.obsidian/workspace.json

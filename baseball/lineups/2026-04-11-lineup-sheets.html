@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Yeager 9U — Lineup Sheets — April 11, 2026</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Arial', sans-serif;
+    font-size: 12px;
+    color: #111;
+    background: white;
+  }
+
+  .page {
+    width: 8.5in;
+    min-height: 11in;
+    padding: 0.45in 0.5in;
+    page-break-after: always;
+  }
+
+  /* ── Header ── */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 3px solid #1a3a5c;
+    padding-bottom: 10px;
+    margin-bottom: 14px;
+  }
+  .header-left h1 {
+    font-size: 22px;
+    font-weight: 900;
+    color: #1a3a5c;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .header-left .subtitle {
+    font-size: 12px;
+    color: #555;
+    margin-top: 2px;
+  }
+  .header-right {
+    text-align: right;
+  }
+  .game-badge {
+    display: inline-block;
+    background: #1a3a5c;
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 4px 14px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+  }
+  .game-info {
+    margin-top: 6px;
+    font-size: 11px;
+    color: #555;
+  }
+  .game-info span {
+    display: inline-block;
+    margin-left: 10px;
+  }
+  .game-info label {
+    font-weight: 700;
+    color: #333;
+  }
+
+  /* ── Meta row ── */
+  .meta-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .meta-box {
+    flex: 1;
+    border: 1.5px solid #ccc;
+    border-radius: 4px;
+    padding: 6px 10px;
+  }
+  .meta-box label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #888;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 2px;
+  }
+  .meta-box .fill-line {
+    border-bottom: 1px solid #aaa;
+    min-height: 16px;
+    width: 100%;
+  }
+
+  /* ── Lineup table ── */
+  .section-title {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #1a3a5c;
+    border-left: 3px solid #1a3a5c;
+    padding-left: 6px;
+    margin-bottom: 6px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 14px;
+  }
+  thead th {
+    background: #1a3a5c;
+    color: white;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    padding: 5px 7px;
+    text-align: left;
+    font-weight: 700;
+  }
+  thead th.center { text-align: center; }
+
+  tbody tr { border-bottom: 1px solid #ddd; }
+  tbody tr:last-child { border-bottom: 2px solid #1a3a5c; }
+  tbody tr:nth-child(even) { background: #f5f8fc; }
+
+  td {
+    padding: 7px 7px;
+    vertical-align: middle;
+  }
+  td.order-num {
+    text-align: center;
+    font-size: 16px;
+    font-weight: 900;
+    color: #1a3a5c;
+    width: 34px;
+  }
+  td.jersey {
+    text-align: center;
+    font-weight: 700;
+    font-size: 13px;
+    width: 42px;
+    color: #333;
+  }
+  td.player-name {
+    font-size: 13px;
+    font-weight: 700;
+    width: 170px;
+  }
+  td.positions {
+    font-size: 10px;
+    color: #555;
+    width: 110px;
+  }
+  td.pos-box {
+    width: 70px;
+  }
+  td.notes-box {
+    /* flexible */
+  }
+
+  .write-box {
+    border: 1px solid #bbb;
+    border-radius: 3px;
+    height: 22px;
+    width: 100%;
+    background: #fafafa;
+  }
+
+  /* ── Pitching tracker ── */
+  .bottom-section {
+    display: flex;
+    gap: 12px;
+    margin-top: 4px;
+  }
+  .pitch-block {
+    flex: 1;
+    border: 1.5px solid #1a3a5c;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .pitch-block-header {
+    background: #1a3a5c;
+    color: white;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    padding: 4px 8px;
+  }
+  .pitch-block-body {
+    padding: 8px;
+  }
+  .pitch-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+    gap: 6px;
+  }
+  .pitch-row label {
+    font-size: 10px;
+    font-weight: 700;
+    width: 95px;
+    flex-shrink: 0;
+  }
+  .pitch-row .dot-line {
+    flex: 1;
+    border-bottom: 1px dotted #aaa;
+    min-height: 14px;
+  }
+  .pitch-row .count-box {
+    border: 1px solid #bbb;
+    border-radius: 3px;
+    width: 38px;
+    height: 18px;
+    background: #fafafa;
+  }
+
+  .notes-block {
+    flex: 1.2;
+    border: 1.5px solid #ccc;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .notes-block-header {
+    background: #dde4ed;
+    color: #1a3a5c;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    padding: 4px 8px;
+  }
+  .notes-block-body {
+    padding: 8px;
+    height: 80px;
+    background: repeating-linear-gradient(
+      to bottom,
+      white,
+      white 17px,
+      #eee 17px,
+      #eee 18px
+    );
+  }
+
+  /* ── Absent note ── */
+  .absent-note {
+    background: #fff3cd;
+    border: 1px solid #e0a800;
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-size: 10px;
+    color: #7a5600;
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+
+  @media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .page { page-break-after: always; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===========================
+     GAME 1 — Grayson absent
+     =========================== -->
+<div class="page">
+
+  <div class="header">
+    <div class="header-left">
+      <h1>Yeager Baseball</h1>
+      <div class="subtitle">9U · Spring 2026 · Official Lineup Card</div>
+    </div>
+    <div class="header-right">
+      <div class="game-badge">GAME 1</div>
+      <div class="game-info">
+        <span><label>Date:</label> April 11, 2026</span>
+        <span><label>vs.</label> <span style="border-bottom:1px solid #aaa; display:inline-block; width:100px;">&nbsp;</span></span>
+      </div>
+      <div class="game-info">
+        <span><label>Location:</label> <span style="border-bottom:1px solid #aaa; display:inline-block; width:120px;">&nbsp;</span></span>
+        <span><label>Time:</label> <span style="border-bottom:1px solid #aaa; display:inline-block; width:60px;">&nbsp;</span></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="absent-note">⚠ Absent: #1 Grayson Neville</div>
+
+  <div class="meta-row">
+    <div class="meta-box"><label>Starting Pitcher</label><div class="fill-line"></div></div>
+    <div class="meta-box"><label>Catcher</label><div class="fill-line"></div></div>
+    <div class="meta-box"><label>Umpire</label><div class="fill-line"></div></div>
+    <div class="meta-box"><label>Score</label><div class="fill-line"></div></div>
+  </div>
+
+  <div class="section-title">Batting Order</div>
+  <table>
+    <thead>
+      <tr>
+        <th class="center">#</th>
+        <th class="center">Jersey</th>
+        <th>Player</th>
+        <th>Positions</th>
+        <th class="center">Playing</th>
+        <th>Notes / ABs</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="order-num">1</td>
+        <td class="jersey">21</td>
+        <td class="player-name">Zach Martini</td>
+        <td class="positions">SS · C · P</td>
+        <td class="pos-box"><div class="write-box"></div></td>
+        <td class="notes-box"><div class="write-box"></div></td>
+      </tr>
+      <tr>
+        <td class="order-num">2</td>
+        <td class="jersey">2</td>
+        <td class="player-name">Crew Powers</td>
+        <td class="positions">CF · SS · LF</td>
+        <td class="pos-box"><div class="write-box"></div></td>
+        <td class="notes-box"><div class="write-box"></div></td>
+      </tr>
+      <tr>
+        <td class="order-num">3</td>
+        <td class="jersey">3</td>
+        <td class="player-name">Lukas Adams</td>
+        <td class="positions">1B · P</td>
+        <td class="pos-box"><div class="write-box"></div></td>
+        <td class="notes-box"><div class="write-box"></div></td>
+      </tr>
+      <tr>
+        <td class="order-num">4</td>
+        <td class="jersey">6</td>
+        <td class="player-name">Porter Mills</td>
+        <td class="positions">P · 1B</td>
+        <td class="pos-box"><div class="write-box"></div></td>
+        <td class="notes-box"><div class="write-box"></div></td>
+      </tr>
+      <tr>
+        <td class="order-num">5</td>
+        <td class="jersey">15</td>
+        <td class="player-name">Charlie Ruther</td>
+        <td class="positions">C · P · LF</td>
+        <td class="pos-box"><div class="write-box"></div></td>
+        <td class="notes-box"><div class="write-box"></div></td>
+      </tr>
+      <tr>
+        <td class="order-num">6</td>
+        <td class="jersey">19</td>
+        <td class="player-name">Blake Fristoe</td>
+        <td class="positions">1B · P · RF · CF</td>
+        <td class="pos-box"><div class="write-box"></div></td>
+        <td class="notes-box"><div class="write-box"></div></td>
+      </tr>
+      <tr>
+        <td class="order-num">7</td>
+        <td class="jersey">56</td>
+        <td class="player-name">Kayson Sander</td>
+        <td class="positions">LF · P</td>
+        <td class="pos-box"><div class="write-box"></div></td>
+        <td class="notes-box"><div class="write-box"></div></td>
+      </tr>
+      <tr>
+        <td class="order-num">8</td>
+        <td class="jersey">10</td>
+        <td class="player-name">Blake Lasita</td>
+        <td class="positions">3B · LF · CF · P</td>
+        <td class="pos-box"><div class="write-box"></div></td>
+        <td class="notes-box"><div class="write-box"></div></td>
+      </tr>
+      <tr>
+        <td class="order-num">9</td>
+        <td class="jersey">11</td>
+        <td class="player-name">Mason Floyd</td>
+        <td class="positions">2B · RF · LF · C</td>
+        <td class="pos-box"><div class="write-box"></div></td>
+        <td class="notes-box"><div class="write-box"></div></td>
+      </tr>
+      <tr>
+        <td class="order-num">10</td>
+        <td class="jersey">9</td>
+        <td class="player-name">Alex Todd</td>
+        <td class="positions">3B · CF · RF · SS · P</td>
+        <td class="pos-box"><div class="write-box"></div></td>
+        <td class="notes-box"><div class="write-box"></div></td>
+      </tr>
+      <tr>
+        <td class="order-num">11</td>
+        <td class="jersey">17</td>
+        <td class="player-name">Owen Niemer</td>
+        <td class="positions">P · 3B · LF · RF</td>
+        <td class="pos-box"><div class="write-box"></div></td>
+        <td class="notes-box"><div class="write-box"></div></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="bottom-section">
+    <div class="pitch-block">
+      <div class="pitch-block-header">Pitch Count Tracker</div>
+      <div class="pitch-block-body">
+        <div class="pitch-row"><label>Zach Martini #21</label><div class="dot-line"></div><div class="count-box"></div></div>
+        <div class="pitch-row"><label>Porter Mills #6</label><div class="dot-line"></div><div class="count-box"></div></div>
+        <div class="pitch-row"><label>Lukas Adams #3</label><div class="dot-line"></div><div class="count-box"></div></div>
+        <div class="pitch-row"><label>Charlie Ruther #15</label><div class="dot-line"></div><div class="count-box"></div></div>
+        <div class="pitch-row"><label>Other: ____________</label><div class="dot-line"></div><div class="count-box"></div></div>
+      </div>
+    </div>
+    <div class="notes-block">
+      <div class="notes-block-header">Game Notes</div>
+      <div class="notes-block-body"></div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ===========================
+     GAME 2 — Full roster
+     =========================== -->
+<div class="page">
+
+  <div class="header">
+    <div class="header-left">
+      <h1>Yeager Baseball</h1>
+      <div class="subtitle">9U · Spring 2026 · Official Lineup Card</div>
+    </div>
+    <div class="header-right">
+      <div class="game-badge">GAME 2</div>
+      <div class="game-info">
+        <span><label>Date:</label> April 11, 2026</span>
+        <span><label>vs.</label> <span style="border-bottom:1px solid #aaa; display:inline-block; width:100px;">&nbsp;</span></span>
+      </div>
+      <div class="game-info">
+        <span><label>Location:</label> <span style="border-bottom:1px solid #aaa; display:inline-block; width:120px;">&nbsp;</span></span>
+        <span><label>Time:</label> <span style="border-bottom:1px solid #aaa; display:inline-block; width:60px;">&nbsp;</span></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="meta-row">
+    <div class="meta-box"><label>Starting Pitcher</label><div class="fill-line"></div></div>
+    <div class="meta-box"><label>Catcher</label><div class="fill-line"></div></div>
+    <div class="meta-box"><label>Umpire</label><div class="fill-line"></div></div>
+    <div class="meta-box"><label>Score</label><div class="fill-line"></div></div>
+  </div>
+
+  <div class="section-title">Batting Order</div>
+  <table>
+    <thead>
+      <tr>
+        <th class="center">#</th>
+        <th class="center">Jersey</th>
+        <th>Player</th>
+        <th>Positions</th>
+        <th class="center">Playing</th>
+        <th>Notes / ABs</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="order-num">1</td>
+        <td class="jersey">21</td>
+        <td class="player-name">Zach Martini</td>
+        <td class="positions">SS · C · P</td>
+        <td class="pos-box"><div class="write-box"></div></td>
+        <td class="notes-box"><div class="write-box"></div></td>
+      </tr>
+      <tr>
+        <td class="order-num">2</td>
+        <td class="jersey">2</td>
+        <td class="player-name">Crew Powers</td>
+        <td class="positions">CF · SS · LF</td>
+        <td class="pos-box"><div class="write-box"></div></td>
+        <td class="notes-box"><div class="write-box"></div></td>
+      </tr>
+      <tr>
+        <td class="order-num">3</td>
+        <td class="jersey">3</td>
+        <td class="player-name">Lukas Adams</td>
+        <td class="positions">1B · P</td>
+        <td class="pos-box"><div class="write-box"></div></td>
+        <td class="notes-box"><div class="write-box"></div></td>
+      </tr>
+      <tr>
+        <td class="order-num">4</td>
+        <td class="jersey">6</td>
+        <td class="player-name">Porter Mills</td>
+        <td class="positions">P · 1B</td>
+        <td class="pos-box"><div class="write-box"></div></td>
+        <td class="notes-box"><div class="write-box"></div></td>
+      </tr>
+      <tr>
+        <td class="order-num">5</td>
+        <td class="jersey">1</td>
+        <td class="player-name">Grayson Neville</td>
+        <td class="positions">2B · C</td>
+        <td class="pos-box"><div class="write-box"></div></td>
+        <td class="notes-box"><div class="write-box"></div></td>
+      </tr>
+      <tr>
+        <td class="order-num">6</td>
+        <td class="jersey">15</td>
+        <td class="player-name">Charlie Ruther</td>
+        <td class="positions">C · P · LF</td>
+        <td class="pos-box"><div class="write-box"></div></td>
+        <td class="notes-box"><div class="write-box"></div></td>
+      </tr>
+      <tr>
+        <td class="order-num">7</td>
+        <td class="jersey">19</td>
+        <td class="player-name">Blake Fristoe</td>
+        <td class="positions">1B · P · RF · CF</td>
+        <td class="pos-box"><div class="write-box"></div></td>
+        <td class="notes-box"><div class="write-box"></div></td>
+      </tr>
+      <tr>
+        <td class="order-num">8</td>
+        <td class="jersey">56</td>
+        <td class="player-name">Kayson Sander</td>
+        <td class="positions">LF · P</td>
+        <td class="pos-box"><div class="write-box"></div></td>
+        <td class="notes-box"><div class="write-box"></div></td>
+      </tr>
+      <tr>
+        <td class="order-num">9</td>
+        <td class="jersey">10</td>
+        <td class="player-name">Blake Lasita</td>
+        <td class="positions">3B · LF · CF · P</td>
+        <td class="pos-box"><div class="write-box"></div></td>
+        <td class="notes-box"><div class="write-box"></div></td>
+      </tr>
+      <tr>
+        <td class="order-num">10</td>
+        <td class="jersey">11</td>
+        <td class="player-name">Mason Floyd</td>
+        <td class="positions">2B · RF · LF · C</td>
+        <td class="pos-box"><div class="write-box"></div></td>
+        <td class="notes-box"><div class="write-box"></div></td>
+      </tr>
+      <tr>
+        <td class="order-num">11</td>
+        <td class="jersey">9</td>
+        <td class="player-name">Alex Todd</td>
+        <td class="positions">3B · CF · RF · SS · P</td>
+        <td class="pos-box"><div class="write-box"></div></td>
+        <td class="notes-box"><div class="write-box"></div></td>
+      </tr>
+      <tr>
+        <td class="order-num">12</td>
+        <td class="jersey">17</td>
+        <td class="player-name">Owen Niemer</td>
+        <td class="positions">P · 3B · LF · RF</td>
+        <td class="pos-box"><div class="write-box"></div></td>
+        <td class="notes-box"><div class="write-box"></div></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="bottom-section">
+    <div class="pitch-block">
+      <div class="pitch-block-header">Pitch Count Tracker</div>
+      <div class="pitch-block-body">
+        <div class="pitch-row"><label>Zach Martini #21</label><div class="dot-line"></div><div class="count-box"></div></div>
+        <div class="pitch-row"><label>Porter Mills #6</label><div class="dot-line"></div><div class="count-box"></div></div>
+        <div class="pitch-row"><label>Lukas Adams #3</label><div class="dot-line"></div><div class="count-box"></div></div>
+        <div class="pitch-row"><label>Charlie Ruther #15</label><div class="dot-line"></div><div class="count-box"></div></div>
+        <div class="pitch-row"><label>Other: ____________</label><div class="dot-line"></div><div class="count-box"></div></div>
+      </div>
+    </div>
+    <div class="notes-block">
+      <div class="notes-block-header">Game Notes</div>
+      <div class="notes-block-body"></div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Yeager 9U — Blank Defensive Rotation — June 6, 2026</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; background: white; color: #111; }
+
+  .page {
+    width: 11in;
+    min-height: 8.5in;
+    padding: 0.3in 0.44in 0.2in;
+  }
+
+  /* ── Header ── */
+  .header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    border-bottom: 2.5px solid #1a3a5c;
+    padding-bottom: 7px;
+    margin-bottom: 9px;
+  }
+  .header h1 { font-size: 20px; font-weight: 900; color: #1a3a5c; }
+  .header .sub { font-size: 10.5px; color: #666; margin-top: 2px; }
+  .header-right { display: flex; gap: 18px; align-items: flex-end; }
+  .meta { font-size: 10.5px; color: #555; }
+  .meta b { color: #222; }
+  .fill { display: inline-block; border-bottom: 1px solid #999; width: 100px; margin-left: 4px; }
+
+  /* ── Player reference ── */
+  .ref {
+    background: #f7f9fc;
+    border: 1px solid #d0dae6;
+    border-radius: 4px;
+    padding: 6px 10px;
+    margin-bottom: 10px;
+  }
+  .ref-title {
+    font-size: 9px;
+    font-weight: 700;
+    color: #1a3a5c;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 4px;
+  }
+  .ref-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 3px 8px;
+  }
+  .ref-item { display: flex; align-items: baseline; gap: 5px; font-size: 10px; }
+  .ref-item .num {
+    display: inline-block;
+    background: #1a3a5c;
+    color: white;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 2px;
+    min-width: 22px;
+    text-align: center;
+  }
+  .ref-item .name { font-weight: 700; }
+  .ref-item .pos { color: #888; font-size: 9px; }
+
+  /* ── Table ── */
+  table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  col.pos-col { width: 54px; }
+  col.inn-col { width: calc((100% - 54px) / 6); }
+
+  /* Inning header */
+  thead tr.hdr th {
+    background: #1a3a5c;
+    color: white;
+    font-weight: 800;
+    font-size: 12px;
+    text-align: center;
+    padding: 7px 4px 4px;
+    border: 1px solid #2a4e7a;
+  }
+  thead tr.hdr th.pos-hd {
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+  }
+
+  /* Pitcher write row — light background, easy to write on */
+  thead tr.pitch-row th {
+    background: #f0f4f0;
+    color: #333;
+    font-size: 8.5px;
+    font-weight: 700;
+    text-align: left;
+    padding: 4px 8px 5px;
+    border: 1px solid #c8d8c8;
+    border-top: none;
+  }
+  thead tr.pitch-row th.pos-hd-p {
+    background: #e8f0e8;
+    font-size: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: center;
+    color: #4a6a4a;
+    font-weight: 700;
+  }
+  .pitch-label { color: #6a8a6a; display: block; margin-bottom: 2px; font-size: 8px; }
+  .pitch-write { display: block; border-bottom: 1px solid #aaa; height: 14px; width: 90%; }
+
+  /* Body rows — pure white or very faint stripe, pencil-friendly */
+  tbody tr:nth-child(even) td.dc { background: #f9fafb; }
+  tbody tr:nth-child(odd)  td.dc { background: white; }
+
+  /* Position label */
+  td.pc {
+    background: #edf2f8 !important;
+    font-size: 13px;
+    font-weight: 900;
+    color: #1a3a5c;
+    text-align: center;
+    vertical-align: middle;
+    padding: 0;
+    border: 1px solid #c0cedd;
+    border-right: 2px solid #1a3a5c;
+  }
+
+  /* Data cell */
+  td.dc {
+    border: 1px solid #cdd8e4;
+    vertical-align: bottom;
+    padding: 0 8px 5px;
+    height: 44px;
+  }
+
+  /* Single ruled line inside each cell — wide and low for easy writing */
+  .wr { border-bottom: 1px solid #bbb; display: block; width: 100%; height: 26px; }
+
+  /* Bench header */
+  tr.bench-hdr td {
+    background: #f0ece0 !important;
+    color: #7a5a00;
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-align: center;
+    padding: 3px 4px;
+    border: 1px solid #d8cc9a;
+    border-top: 2px solid #b8a060;
+  }
+  tr.bench-hdr td.pc {
+    background: #f0ece0 !important;
+    border-right: 2px solid #1a3a5c;
+    border-top: 2px solid #b8a060;
+  }
+
+  /* Bench data rows */
+  tr.bench-row td.dc {
+    background: white !important;
+    border: 1px solid #d8cc9a;
+    height: 38px;
+    vertical-align: bottom;
+    padding: 0 8px 5px;
+  }
+  tr.bench-row td.pc {
+    background: #f8f4e8 !important;
+    border-right: 2px solid #1a3a5c;
+    font-size: 10px;
+    color: #9a7000;
+    font-weight: 700;
+  }
+
+  @media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    @page { size: 11in 8.5in landscape; margin: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div>
+      <h1>Yeager Baseball — Defensive Rotation</h1>
+      <div class="sub">9U · Spring 2026 · 9-Man Defense · 6 Innings · June 6, 2026</div>
+    </div>
+    <div class="header-right">
+      <div class="meta"><b>Game:</b><span class="fill"></span></div>
+      <div class="meta"><b>vs.</b><span class="fill"></span></div>
+    </div>
+  </div>
+
+  <div class="ref">
+    <div class="ref-title">Roster</div>
+    <div class="ref-grid">
+      <div class="ref-item"><span class="num">1</span> <span class="name">Grayson Neville</span> <span class="pos">2B · C</span></div>
+      <div class="ref-item"><span class="num">2</span> <span class="name">Crew Powers</span> <span class="pos">CF · SS · LF</span></div>
+      <div class="ref-item"><span class="num">3</span> <span class="name">Lukas Adams</span> <span class="pos">1B · P</span></div>
+      <div class="ref-item"><span class="num">6</span> <span class="name">Porter Mills</span> <span class="pos">P · 1B</span></div>
+      <div class="ref-item"><span class="num">9</span> <span class="name">Alex Todd</span> <span class="pos">3B · CF · RF · SS · P</span></div>
+      <div class="ref-item"><span class="num">10</span> <span class="name">Blake Lasita</span> <span class="pos">3B · LF · CF · P</span></div>
+      <div class="ref-item"><span class="num">11</span> <span class="name">Mason Floyd</span> <span class="pos">2B · RF · LF · C</span></div>
+      <div class="ref-item"><span class="num">15</span> <span class="name">Charlie Ruther</span> <span class="pos">C · P · LF</span></div>
+      <div class="ref-item"><span class="num">17</span> <span class="name">Owen Niemer</span> <span class="pos">P · 3B · LF · RF</span></div>
+      <div class="ref-item"><span class="num">19</span> <span class="name">Blake Fristoe</span> <span class="pos">1B · P · RF · CF</span></div>
+      <div class="ref-item"><span class="num">21</span> <span class="name">Zach Martini</span> <span class="pos">SS · C · P</span></div>
+      <div class="ref-item"><span class="num">56</span> <span class="name">Kayson Sander</span> <span class="pos">LF · P</span></div>
+    </div>
+  </div>
+
+  <table>
+    <colgroup>
+      <col class="pos-col">
+      <col class="inn-col"><col class="inn-col"><col class="inn-col">
+      <col class="inn-col"><col class="inn-col"><col class="inn-col">
+    </colgroup>
+    <thead>
+      <tr class="hdr">
+        <th class="pos-hd">POS</th>
+        <th>Inning 1</th>
+        <th>Inning 2</th>
+        <th>Inning 3</th>
+        <th>Inning 4</th>
+        <th>Inning 5</th>
+        <th>Inning 6</th>
+      </tr>
+      <tr class="pitch-row">
+        <th class="pos-hd-p">P</th>
+        <th><span class="pitch-label">Pitcher:</span><span class="pitch-write"></span></th>
+        <th><span class="pitch-label">Pitcher:</span><span class="pitch-write"></span></th>
+        <th><span class="pitch-label">Pitcher:</span><span class="pitch-write"></span></th>
+        <th><span class="pitch-label">Pitcher:</span><span class="pitch-write"></span></th>
+        <th><span class="pitch-label">Pitcher:</span><span class="pitch-write"></span></th>
+        <th><span class="pitch-label">Pitcher:</span><span class="pitch-write"></span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td class="pc">C</td>  <td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td></tr>
+      <tr><td class="pc">1B</td> <td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td></tr>
+      <tr><td class="pc">2B</td> <td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td></tr>
+      <tr><td class="pc">3B</td> <td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td></tr>
+      <tr><td class="pc">SS</td> <td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td></tr>
+      <tr><td class="pc">LF</td> <td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td></tr>
+      <tr><td class="pc">CF</td> <td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td></tr>
+      <tr><td class="pc">RF</td> <td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td></tr>
+
+      <tr class="bench-hdr">
+        <td class="pc">BENCH</td>
+        <td colspan="6" style="text-align:left; padding-left:10px; letter-spacing:0.5px;">
+          12 players · 9 on field · 3 bench per inning
+        </td>
+      </tr>
+      <tr class="bench-row">
+        <td class="pc">B1</td>
+        <td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td>
+      </tr>
+      <tr class="bench-row">
+        <td class="pc">B2</td>
+        <td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td>
+      </tr>
+      <tr class="bench-row">
+        <td class="pc">B3</td>
+        <td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td><td class="dc"><span class="wr"></span></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+</body>
+</html>

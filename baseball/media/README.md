@@ -1,4 +1,4 @@
-# Jaegers 9U — Season Media Library
+# Yeager 9U — Season Media Library
 
 > Photos and videos from the 2026 spring season. Used for end-of-season collage, highlight reels, and memories.
 

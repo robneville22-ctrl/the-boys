@@ -4,7 +4,7 @@
 - **Date:**
 - **Opponent:**
 - **Result:** W / L / Tie
-- **Score:** Jaegers _ – _ Opponent
+- **Score:** Yeager _ – _ Opponent
 - **Time limit reached?** Yes / No
 - **Umpire notes:**
 

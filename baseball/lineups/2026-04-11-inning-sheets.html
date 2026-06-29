@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Yeager 9U — Inning-by-Inning Defense — April 11, 2026</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; font-size: 11px; color: #111; background: white; }
+
+  .page {
+    width: 11in; min-height: 8.5in;
+    padding: 0.3in 0.42in;
+    page-break-after: always;
+  }
+
+  .header { display: flex; align-items: flex-end; justify-content: space-between; border-bottom: 3px solid #1a3a5c; padding-bottom: 7px; margin-bottom: 9px; }
+  .header-left h1 { font-size: 19px; font-weight: 900; color: #1a3a5c; }
+  .header-left .sub { font-size: 10px; color: #666; margin-top: 1px; }
+  .header-right { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; justify-content: flex-end; }
+  .badge { background: #1a3a5c; color: white; font-size: 14px; font-weight: 800; padding: 4px 14px; border-radius: 4px; }
+  .meta { font-size: 10px; color: #555; }
+  .meta b { color: #222; }
+  .fill { display: inline-block; border-bottom: 1px solid #999; width: 80px; margin-left: 3px; }
+  .absent-tag { color: #a06000; font-weight: 700; font-size: 9px; background: #fff3cd; border: 1px solid #e0a800; border-radius: 3px; padding: 2px 6px; }
+
+  .ref-bar { display: flex; flex-wrap: wrap; gap: 5px 12px; background: #f2f5f9; border: 1px solid #c8d4e0; border-radius: 4px; padding: 5px 10px; margin-bottom: 8px; }
+  .ref-bar .ref-title { font-size: 9px; font-weight: 700; color: #1a3a5c; width: 100%; margin-bottom: 1px; }
+  .ref-item { font-size: 9.5px; white-space: nowrap; }
+  .ref-item .num { display: inline-block; background: #1a3a5c; color: white; font-size: 8.5px; font-weight: 700; padding: 0px 4px; border-radius: 2px; margin-right: 3px; }
+  .ref-item .ph { color: #888; font-size: 8.5px; }
+
+  .legend { display: flex; gap: 10px; margin-bottom: 7px; align-items: center; flex-wrap: wrap; font-size: 9px; }
+  .legend b { color: #444; }
+  .leg { display: flex; align-items: center; gap: 4px; }
+  .sw { width: 13px; height: 11px; border: 1px solid #ccc; border-radius: 2px; }
+  .sw-p { background: #e0f0e0; } .sw-c { background: #fdf0e5; } .sw-b { background: #fff8e0; } .sw-w { background: #fff0f0; }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead th { background: #1a3a5c; color: white; font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; padding: 5px; border: 1px solid #2a4e7a; text-align: center; }
+  thead th.lh { text-align: left; padding-left: 7px; }
+  thead th.inn { width: calc((100% - 52px) / 6); line-height: 1.3; }
+  thead th .ps { font-size: 7.5px; font-weight: 400; opacity: 0.85; display: block; }
+
+  td.pl { font-size: 13px; font-weight: 900; color: #1a3a5c; text-align: center; width: 52px; padding: 0; border: 1px solid #c0ccd8; border-right: 2px solid #1a3a5c; background: #eaf0f7; }
+  td.cell { border: 1px solid #c0ccd8; text-align: center; vertical-align: middle; height: 37px; padding: 2px 3px; }
+  tbody tr:nth-child(even) td.cell { background: #f7fafd; }
+  tbody tr:nth-child(odd) td.cell { background: white; }
+  td.cell.blank { background: #fafafa !important; }
+  td.cell .pn { display: block; font-size: 10.5px; font-weight: 700; color: #1a3a5c; line-height: 1.2; }
+  td.cell .jn { display: block; font-size: 8px; color: #888; }
+  td.cell .nt { display: block; font-size: 7.5px; color: #aaa; font-style: italic; }
+  td.cell.isp { background: #e0f0e0 !important; } td.cell .pn.pcol { color: #1a5c1a; }
+  td.cell.isc { background: #fdf0e5 !important; } td.cell .pn.ccol { color: #7a3a00; }
+  td.cell.isw { background: #fff0f0 !important; } td.cell .pn.wcol { color: #a00000; }
+
+  tr.brow td { background: #fff8e0 !important; border-top: 2px dashed #c8a040 !important; font-size: 9px; font-weight: 700; color: #7a5000; text-align: center; padding: 3px 4px; }
+  tr.brow td.pl { background: #fff8e0 !important; border-right: 2px solid #1a3a5c; font-size: 9px; font-weight: 700; color: #a06000; }
+  tr.brow2 td { background: #fff8e0 !important; font-size: 9px; color: #7a5000; text-align: center; padding: 3px 4px; border: 1px solid #d4c090; }
+  tr.brow2 td.pl { background: #fff8e0 !important; border-right: 2px solid #1a3a5c; }
+
+  .notes-row { display: flex; gap: 8px; margin-top: 7px; }
+  .nb { flex: 1; border: 1.5px solid #c0ccd8; border-radius: 4px; overflow: hidden; }
+  .nbh { background: #1a3a5c; color: white; font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 3px 7px; }
+  .nbb { height: 34px; background: repeating-linear-gradient(white, white 14px, #e8e8e8 14px, #e8e8e8 15px); padding: 1px 5px; font-size: 8.5px; color: #555; line-height: 14px; }
+
+  @media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .page { page-break-after: always; }
+    @page { size: 11in 8.5in landscape; margin: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- PAGE 1 — BLANK -->
+<div class="page">
+  <div class="header">
+    <div class="header-left">
+      <h1>Yeager 9U — Defensive Rotation</h1>
+      <div class="sub">Spring 2026 · Inning-by-Inning · 9-Man Defense · 6 Innings</div>
+    </div>
+    <div class="header-right">
+      <div class="badge">BLANK</div>
+      <div class="meta"><b>Date:</b><span class="fill"></span></div>
+      <div class="meta"><b>vs.</b><span class="fill"></span></div>
+      <div class="meta"><b>Score:</b><span class="fill"></span></div>
+    </div>
+  </div>
+
+  <div class="ref-bar">
+    <div class="ref-title">Roster Quick Reference</div>
+    <span class="ref-item"><span class="num">1</span> Grayson Neville <span class="ph">2B · C</span></span>
+    <span class="ref-item"><span class="num">2</span> Crew Powers <span class="ph">CF · SS · LF</span></span>
+    <span class="ref-item"><span class="num">3</span> Lukas Adams <span class="ph">1B · P</span></span>
+    <span class="ref-item"><span class="num">6</span> Porter Mills <span class="ph">P · 1B</span></span>
+    <span class="ref-item"><span class="num">9</span> Alex Todd <span class="ph">3B · CF · RF · SS · P</span></span>
+    <span class="ref-item"><span class="num">10</span> Blake Lasita <span class="ph">3B · LF · CF · P</span></span>
+    <span class="ref-item"><span class="num">11</span> Mason Floyd <span class="ph">2B · RF · LF · C</span></span>
+    <span class="ref-item"><span class="num">15</span> Charlie Ruther <span class="ph">C · P · LF</span></span>
+    <span class="ref-item"><span class="num">17</span> Owen Niemer <span class="ph">P · 3B · LF · RF</span></span>
+    <span class="ref-item"><span class="num">19</span> Blake Fristoe <span class="ph">1B · P · RF · CF</span></span>
+    <span class="ref-item"><span class="num">21</span> Zach Martini <span class="ph">SS · C · P</span></span>
+    <span class="ref-item"><span class="num">56</span> Kayson Sander <span class="ph">LF · P</span></span>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th class="lh" style="width:52px;">POS</th>
+        <th class="inn">Inning 1<span class="ps">Pitcher: ____________</span></th>
+        <th class="inn">Inning 2<span class="ps">Pitcher: ____________</span></th>
+        <th class="inn">Inning 3<span class="ps">Pitcher: ____________</span></th>
+        <th class="inn">Inning 4<span class="ps">Pitcher: ____________</span></th>
+        <th class="inn">Inning 5<span class="ps">Pitcher: ____________</span></th>
+        <th class="inn">Inning 6<span class="ps">Pitcher: ____________</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td class="pl">P</td>  <td class="cell blank"></td><td class="cell blank"></td><td class="cell blank"></td><td class="cell blank"></td><td class="cell blank"></td><td class="cell blank"></td></tr>
+      <tr><td class="pl">C</td>  <td class="cell blank"></td><td class="cell blank"></td><td class="cell blank"></td><td class="cell blank"></td><td class="cell blank"></td><td class="cell blank"></td></tr>
+      <tr><td class="pl">1B</td> <td class="cell blank"></td><td class="cell blank"></td><td class="cell blank"></td><td class="cell blank"></td><td class="cell blank"></td><td class="cell blank"></td></tr>
+      <tr><td class="pl">2B</td> <td class="cell blank"></td><td class="cell blank"></td><td class="cell blank"></td><td class="cell blank"></td><td class="cell blank"></td><td class="cell blank"></td></tr>
+      <tr><td class="pl">3B</td> <td class="cell blank"></td><td class="cell blank"></td><td class="cell blank"></td><td class="cell blank"></td><td class="cell blank"></td><td class="cell blank"></td></tr>
+      <tr><td class="pl">SS</td> <td class="cell blank"></td><td class="cell blank"></td><td class="cell blank"></td><td class="cell blank"></td><td class="cell blank"></td><td class="cell blank"></td></tr>
+      <tr><td class="pl">LF</td> <td class="cell blank"></td><td class="cell blank"></td><td class="cell blank"></td><td class="cell blank"></td><td class="cell blank"></td><td class="cell blank"></td></tr>
+      <tr><td class="pl">CF</td> <td class="cell blank"></td><td class="cell blank"></td><td class="cell blank"></td><td class="cell blank"></td><td class="cell blank"></td><td class="cell blank"></td></tr>
+      <tr><td class="pl">RF</td> <td class="cell blank"></td><td class="cell blank"></td><td class="cell blank"></td><td class="cell blank"></td><td class="cell blank"></td><td class="cell blank"></td></tr>
+      <tr class="brow"><td class="pl" style="color:#a06000; font-size:9px;">BENCH</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr class="brow2"><td class="pl"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    </tbody>
+  </table>
+
+  <div class="notes-row">
+    <div class="nb"><div class="nbh">Pitching Notes / Pitch Counts</div><div class="nbb"></div></div>
+    <div class="nb"><div class="nbh">Substitutions</div><div class="nbb"></div></div>
+    <div class="nb"><div class="nbh">Game Notes</div><div class="nbb"></div></div>
+  </div>
+</div>
+
+
+<!-- PAGE 2 — SUGGESTED GAME 1 (no Grayson, 11 players, 2 bench/inning) -->
+<!-- Pitchers: Porter(1) Zach(2) Lukas(3) Charlie(4) Owen(5) BlakeF(6) -->
+<!-- Bench inn1: BlakeL+Kayson · inn2: Porter+BlakeF · inn3: Zach+Crew -->
+<!--        inn4: Lukas+Alex  · inn5: Charlie+Mason · inn6: Owen+Kayson -->
+<!-- Kayson sits inn1+6 (not consecutive). Everyone else sits once.     -->
+<div class="page">
+  <div class="header">
+    <div class="header-left">
+      <h1>Yeager 9U — Suggested Defensive Rotation</h1>
+      <div class="sub">Game 1 · April 11, 2026 · 9-Man Defense · 11 Players Active · 2 Bench Per Inning</div>
+    </div>
+    <div class="header-right">
+      <div class="badge">GAME 1</div>
+      <div class="meta"><b>vs.</b><span class="fill"></span></div>
+      <div class="meta"><b>Time:</b><span class="fill"></span></div>
+      <span class="absent-tag">⚠ Absent: #1 Grayson · #56 Kayson sits innings 1 &amp; 6</span>
+    </div>
+  </div>
+
+  <div class="legend">
+    <b>Key:</b>
+    <span class="leg"><span class="sw sw-p"></span>Pitching</span>
+    <span class="leg"><span class="sw sw-c"></span>Catching</span>
+    <span class="leg"><span class="sw sw-b"></span>Bench</span>
+    <span style="color:#777; font-size:8.5px; margin-left:6px;">
+      Pitchers rest the inning immediately after they throw · Kayson sits inn 1 &amp; 6 (not back-to-back) ·
+      Everyone plays 5 of 6 innings · 9-man defense throughout
+    </span>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th class="lh" style="width:52px;">POS</th>
+        <th class="inn" style="background:#1a4a1a;">INN 1<span class="ps">P: Porter Mills #6</span></th>
+        <th class="inn" style="background:#1a4a1a;">INN 2<span class="ps">P: Zach Martini #21</span></th>
+        <th class="inn" style="background:#1a4a1a;">INN 3<span class="ps">P: Lukas Adams #3</span></th>
+        <th class="inn" style="background:#1a4a1a;">INN 4<span class="ps">P: Charlie Ruther #15</span></th>
+        <th class="inn" style="background:#1a4a1a;">INN 5<span class="ps">P: Owen Niemer #17</span></th>
+        <th class="inn" style="background:#1a4a1a;">INN 6<span class="ps">P: Blake Fristoe #19</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="pl">P</td>
+        <td class="cell isp"><span class="pn pcol">Porter Mills</span><span class="jn">#6 · FIP 2.78</span></td>
+        <td class="cell isp"><span class="pn pcol">Zach Martini</span><span class="jn">#21 · 1.20 ERA</span></td>
+        <td class="cell isp"><span class="pn pcol">Lukas Adams</span><span class="jn">#3 · 3.0 IP</span></td>
+        <td class="cell isp"><span class="pn pcol">Charlie Ruther</span><span class="jn">#15 · 6.00 ERA</span></td>
+        <td class="cell isp"><span class="pn pcol">Owen Niemer</span><span class="jn">#17 · 4 K</span></td>
+        <td class="cell isp"><span class="pn pcol">Blake Fristoe</span><span class="jn">#19 · 1.0 IP</span></td>
+      </tr>
+      <tr>
+        <td class="pl">C</td>
+        <td class="cell isc"><span class="pn ccol">Charlie Ruther</span><span class="jn">#15</span></td>
+        <td class="cell isc"><span class="pn ccol">Charlie Ruther</span><span class="jn">#15</span></td>
+        <td class="cell isc"><span class="pn ccol">Charlie Ruther</span><span class="jn">#15</span></td>
+        <td class="cell isc"><span class="pn ccol">Mason Floyd</span><span class="jn">#11 · Charlie pitching</span></td>
+        <td class="cell isc"><span class="pn ccol">Zach Martini</span><span class="jn">#21 · C listed</span></td>
+        <td class="cell isc"><span class="pn ccol">Charlie Ruther</span><span class="jn">#15</span></td>
+      </tr>
+      <tr>
+        <td class="pl">1B</td>
+        <td class="cell"><span class="pn">Lukas Adams</span><span class="jn">#3</span></td>
+        <td class="cell"><span class="pn">Lukas Adams</span><span class="jn">#3</span></td>
+        <td class="cell"><span class="pn">Blake Fristoe</span><span class="jn">#19</span></td>
+        <td class="cell"><span class="pn">Porter Mills</span><span class="jn">#6</span></td>
+        <td class="cell"><span class="pn">Lukas Adams</span><span class="jn">#3</span></td>
+        <td class="cell"><span class="pn">Lukas Adams</span><span class="jn">#3</span></td>
+      </tr>
+      <tr>
+        <td class="pl">2B</td>
+        <td class="cell"><span class="pn">Mason Floyd</span><span class="jn">#11</span></td>
+        <td class="cell"><span class="pn">Mason Floyd</span><span class="jn">#11</span></td>
+        <td class="cell"><span class="pn">Mason Floyd</span><span class="jn">#11</span></td>
+        <td class="cell"><span class="pn">Crew Powers</span><span class="jn">#2 · flex</span></td>
+        <td class="cell"><span class="pn">Alex Todd</span><span class="jn">#9 · flex</span></td>
+        <td class="cell"><span class="pn">Mason Floyd</span><span class="jn">#11</span></td>
+      </tr>
+      <tr>
+        <td class="pl">3B</td>
+        <td class="cell"><span class="pn">Alex Todd</span><span class="jn">#9</span></td>
+        <td class="cell"><span class="pn">Blake Lasita</span><span class="jn">#10</span></td>
+        <td class="cell"><span class="pn">Blake Lasita</span><span class="jn">#10</span></td>
+        <td class="cell"><span class="pn">Blake Lasita</span><span class="jn">#10</span></td>
+        <td class="cell"><span class="pn">Blake Lasita</span><span class="jn">#10</span></td>
+        <td class="cell"><span class="pn">Blake Lasita</span><span class="jn">#10</span></td>
+      </tr>
+      <tr>
+        <td class="pl">SS</td>
+        <td class="cell"><span class="pn">Zach Martini</span><span class="jn">#21</span></td>
+        <td class="cell"><span class="pn">Crew Powers</span><span class="jn">#2 · SS listed</span></td>
+        <td class="cell"><span class="pn">Alex Todd</span><span class="jn">#9 · SS listed · Zach+Crew out</span></td>
+        <td class="cell"><span class="pn">Zach Martini</span><span class="jn">#21</span></td>
+        <td class="cell"><span class="pn">Crew Powers</span><span class="jn">#2</span></td>
+        <td class="cell"><span class="pn">Zach Martini</span><span class="jn">#21</span></td>
+      </tr>
+      <tr>
+        <td class="pl">LF</td>
+        <td class="cell"><span class="pn">Owen Niemer</span><span class="jn">#17</span></td>
+        <td class="cell"><span class="pn">Kayson Sander</span><span class="jn">#56</span></td>
+        <td class="cell"><span class="pn">Kayson Sander</span><span class="jn">#56</span></td>
+        <td class="cell"><span class="pn">Kayson Sander</span><span class="jn">#56</span></td>
+        <td class="cell"><span class="pn">Kayson Sander</span><span class="jn">#56</span></td>
+        <td class="cell"><span class="pn">Alex Todd</span><span class="jn">#9</span></td>
+      </tr>
+      <tr>
+        <td class="pl">CF</td>
+        <td class="cell"><span class="pn">Crew Powers</span><span class="jn">#2</span></td>
+        <td class="cell"><span class="pn">Owen Niemer</span><span class="jn">#17</span></td>
+        <td class="cell"><span class="pn">Owen Niemer</span><span class="jn">#17</span></td>
+        <td class="cell"><span class="pn">Owen Niemer</span><span class="jn">#17</span></td>
+        <td class="cell"><span class="pn">Blake Fristoe</span><span class="jn">#19</span></td>
+        <td class="cell"><span class="pn">Crew Powers</span><span class="jn">#2</span></td>
+      </tr>
+      <tr>
+        <td class="pl">RF</td>
+        <td class="cell"><span class="pn">Blake Fristoe</span><span class="jn">#19</span></td>
+        <td class="cell"><span class="pn">Alex Todd</span><span class="jn">#9</span></td>
+        <td class="cell"><span class="pn">Porter Mills</span><span class="jn">#6 · not natural</span></td>
+        <td class="cell"><span class="pn">Blake Fristoe</span><span class="jn">#19</span></td>
+        <td class="cell"><span class="pn">Porter Mills</span><span class="jn">#6</span></td>
+        <td class="cell"><span class="pn">Porter Mills</span><span class="jn">#6</span></td>
+      </tr>
+      <tr class="brow">
+        <td class="pl" style="color:#a06000; font-size:9px;">BENCH</td>
+        <td><b>Blake Lasita #10</b></td>
+        <td><b>Porter Mills #6</b> <span style="font-size:8px; font-weight:400;">(just pitched)</span></td>
+        <td><b>Zach Martini #21</b> <span style="font-size:8px; font-weight:400;">(just pitched)</span></td>
+        <td><b>Lukas Adams #3</b> <span style="font-size:8px; font-weight:400;">(just pitched)</span></td>
+        <td><b>Charlie Ruther #15</b> <span style="font-size:8px; font-weight:400;">(just pitched)</span></td>
+        <td><b>Owen Niemer #17</b> <span style="font-size:8px; font-weight:400;">(just pitched)</span></td>
+      </tr>
+      <tr class="brow2">
+        <td class="pl"></td>
+        <td><b>Kayson Sander #56</b> <span style="font-size:8px;">(sit 1 of 2)</span></td>
+        <td><b>Blake Fristoe #19</b></td>
+        <td><b>Crew Powers #2</b></td>
+        <td><b>Alex Todd #9</b></td>
+        <td><b>Mason Floyd #11</b></td>
+        <td><b>Kayson Sander #56</b> <span style="font-size:8px;">(sit 2 of 2 — not consecutive ✓)</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="notes-row">
+    <div class="nb" style="flex:2.2;"><div class="nbh">Notes</div>
+    <div class="nbb">Inn 4: Mason catches (Charlie pitching) · Inn 5: Zach catches (C listed; Charlie+Mason both covering other roles) · Inn 3 SS: Alex Todd (Zach benched, Crew benched — Alex has SS listed)</div></div>
+    <div class="nb" style="flex:1;"><div class="nbh">Pitch Counts</div><div class="nbb"></div></div>
+    <div class="nb" style="flex:0.8;"><div class="nbh">Score</div><div class="nbb"></div></div>
+  </div>
+</div>
+
+
+<!-- PAGE 3 — SUGGESTED GAME 2 (no Kayson, 11 players; Grayson in) -->
+<!-- 1 bench per inning · everyone sits exactly once · no consecutive  -->
+<!-- NO GAME-1 PITCHERS THROW (saving for tournament tomorrow)         -->
+<!-- Game 2 arms: Alex(1+6) BlakeL(2) Crew(3) Mason(4) Grayson(5⚠)   -->
+<!-- Bench: Zach+Porter(1) · Alex+BlakeF(2) · BlakeL+Owen(3)          -->
+<!--        Crew+Charlie(4) · Mason+Lukas(5) · Grayson+Porter(6)      -->
+<div class="page">
+  <div class="header">
+    <div class="header-left">
+      <h1>Yeager 9U — Suggested Defensive Rotation</h1>
+      <div class="sub">Game 2 · April 11, 2026 · 9-Man Defense · 11 Players Active · 1 Bench Per Inning</div>
+    </div>
+    <div class="header-right">
+      <div class="badge">GAME 2</div>
+      <div class="meta"><b>vs.</b><span class="fill"></span></div>
+      <div class="meta"><b>Time:</b><span class="fill"></span></div>
+      <span class="absent-tag">⚠ Absent: #56 Kayson · Grayson back</span>
+    </div>
+  </div>
+
+  <div class="legend">
+    <b>Key:</b>
+    <span class="leg"><span class="sw sw-p"></span>Pitching</span>
+    <span class="leg"><span class="sw sw-c"></span>Catching</span>
+    <span class="leg"><span class="sw sw-b"></span>Bench</span>
+    <span class="leg"><span class="sw sw-w"></span>⚠ Flag</span>
+    <span style="color:#777; font-size:8.5px; margin-left:6px;">
+      <b>No Game 1 pitchers throw</b> — protecting arms for tomorrow's tournament ·
+      With only 4–5 usable arms, Alex Todd goes twice (inn 1 &amp; 6) ·
+      Zach &amp; Porter both rest inn 1 (most important arms) · everyone sits exactly 1 inning · no back-to-back bench
+    </span>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th class="lh" style="width:52px;">POS</th>
+        <th class="inn" style="background:#1a4a1a;">INN 1<span class="ps">P: Alex Todd #9</span></th>
+        <th class="inn" style="background:#1a4a1a;">INN 2<span class="ps">P: Blake Lasita #10</span></th>
+        <th class="inn" style="background:#1a4a1a;">INN 3<span class="ps">P: Crew Powers #2</span></th>
+        <th class="inn" style="background:#1a4a1a;">INN 4<span class="ps">P: Mason Floyd #11</span></th>
+        <th class="inn" style="background:#2a1212;">INN 5<span class="ps">P: Grayson Neville #1 ⚠</span></th>
+        <th class="inn" style="background:#1a4a1a;">INN 6<span class="ps">P: Alex Todd #9 (repeat)</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="pl">P</td>
+        <td class="cell isp"><span class="pn pcol">Alex Todd</span><span class="jn">#9 · P listed</span></td>
+        <td class="cell isp"><span class="pn pcol">Blake Lasita</span><span class="jn">#10 · P listed</span></td>
+        <td class="cell isp"><span class="pn pcol">Crew Powers</span><span class="jn">#2 · no prior data</span></td>
+        <td class="cell isp"><span class="pn pcol">Mason Floyd</span><span class="jn">#11 · no prior data</span></td>
+        <td class="cell isw"><span class="pn wcol">Grayson Neville</span><span class="jn">#1 · ⚠ Rob's call</span><span class="nt">profile: practice only</span></td>
+        <td class="cell isp"><span class="pn pcol">Alex Todd</span><span class="jn">#9 · 2nd inning</span></td>
+      </tr>
+      <tr>
+        <td class="pl">C</td>
+        <td class="cell isc"><span class="pn ccol">Charlie Ruther</span><span class="jn">#15</span></td>
+        <td class="cell isc"><span class="pn ccol">Charlie Ruther</span><span class="jn">#15</span></td>
+        <td class="cell isc"><span class="pn ccol">Charlie Ruther</span><span class="jn">#15</span></td>
+        <td class="cell isc"><span class="pn ccol">Grayson Neville</span><span class="jn">#1 · C listed · Charlie resting</span></td>
+        <td class="cell isc"><span class="pn ccol">Charlie Ruther</span><span class="jn">#15</span></td>
+        <td class="cell isc"><span class="pn ccol">Charlie Ruther</span><span class="jn">#15</span></td>
+      </tr>
+      <tr>
+        <td class="pl">1B</td>
+        <td class="cell"><span class="pn">Lukas Adams</span><span class="jn">#3</span></td>
+        <td class="cell"><span class="pn">Porter Mills</span><span class="jn">#6</span></td>
+        <td class="cell"><span class="pn">Porter Mills</span><span class="jn">#6</span></td>
+        <td class="cell"><span class="pn">Lukas Adams</span><span class="jn">#3</span></td>
+        <td class="cell"><span class="pn">Porter Mills</span><span class="jn">#6</span></td>
+        <td class="cell"><span class="pn">Lukas Adams</span><span class="jn">#3</span></td>
+      </tr>
+      <tr>
+        <td class="pl">2B</td>
+        <td class="cell"><span class="pn">Grayson Neville</span><span class="jn">#1 · home spot</span></td>
+        <td class="cell"><span class="pn">Grayson Neville</span><span class="jn">#1</span></td>
+        <td class="cell"><span class="pn">Grayson Neville</span><span class="jn">#1</span></td>
+        <td class="cell"><span class="pn">Alex Todd</span><span class="jn">#9 · flex · Grayson catching</span></td>
+        <td class="cell"><span class="pn">Crew Powers</span><span class="jn">#2 · flex</span></td>
+        <td class="cell"><span class="pn">Mason Floyd</span><span class="jn">#11</span></td>
+      </tr>
+      <tr>
+        <td class="pl">3B</td>
+        <td class="cell"><span class="pn">Blake Lasita</span><span class="jn">#10</span></td>
+        <td class="cell"><span class="pn">Owen Niemer</span><span class="jn">#17</span></td>
+        <td class="cell"><span class="pn">Alex Todd</span><span class="jn">#9</span></td>
+        <td class="cell"><span class="pn">Blake Lasita</span><span class="jn">#10</span></td>
+        <td class="cell"><span class="pn">Blake Lasita</span><span class="jn">#10</span></td>
+        <td class="cell"><span class="pn">Blake Lasita</span><span class="jn">#10</span></td>
+      </tr>
+      <tr>
+        <td class="pl">SS</td>
+        <td class="cell"><span class="pn">Crew Powers</span><span class="jn">#2 · Zach resting inn 1</span></td>
+        <td class="cell"><span class="pn">Zach Martini</span><span class="jn">#21</span></td>
+        <td class="cell"><span class="pn">Zach Martini</span><span class="jn">#21</span></td>
+        <td class="cell"><span class="pn">Zach Martini</span><span class="jn">#21</span></td>
+        <td class="cell"><span class="pn">Zach Martini</span><span class="jn">#21</span></td>
+        <td class="cell"><span class="pn">Zach Martini</span><span class="jn">#21</span></td>
+      </tr>
+      <tr>
+        <td class="pl">LF</td>
+        <td class="cell"><span class="pn">Owen Niemer</span><span class="jn">#17</span></td>
+        <td class="cell"><span class="pn">Crew Powers</span><span class="jn">#2</span></td>
+        <td class="cell"><span class="pn">Mason Floyd</span><span class="jn">#11</span></td>
+        <td class="cell"><span class="pn">Owen Niemer</span><span class="jn">#17</span></td>
+        <td class="cell"><span class="pn">Owen Niemer</span><span class="jn">#17</span></td>
+        <td class="cell"><span class="pn">Owen Niemer</span><span class="jn">#17</span></td>
+      </tr>
+      <tr>
+        <td class="pl">CF</td>
+        <td class="cell"><span class="pn">Blake Fristoe</span><span class="jn">#19</span></td>
+        <td class="cell"><span class="pn">Lukas Adams</span><span class="jn">#3 · flex</span></td>
+        <td class="cell"><span class="pn">Blake Fristoe</span><span class="jn">#19</span></td>
+        <td class="cell"><span class="pn">Blake Fristoe</span><span class="jn">#19</span></td>
+        <td class="cell"><span class="pn">Blake Fristoe</span><span class="jn">#19</span></td>
+        <td class="cell"><span class="pn">Crew Powers</span><span class="jn">#2</span></td>
+      </tr>
+      <tr>
+        <td class="pl">RF</td>
+        <td class="cell"><span class="pn">Mason Floyd</span><span class="jn">#11</span></td>
+        <td class="cell"><span class="pn">Mason Floyd</span><span class="jn">#11</span></td>
+        <td class="cell"><span class="pn">Lukas Adams</span><span class="jn">#3 · flex</span></td>
+        <td class="cell"><span class="pn">Porter Mills</span><span class="jn">#6</span></td>
+        <td class="cell"><span class="pn">Alex Todd</span><span class="jn">#9</span></td>
+        <td class="cell"><span class="pn">Blake Fristoe</span><span class="jn">#19</span></td>
+      </tr>
+      <tr class="brow">
+        <td class="pl" style="color:#a06000; font-size:9px;">BENCH</td>
+        <td><b>Zach Martini #21</b> <span style="font-size:8px; font-weight:400;">(resting — top arm)</span></td>
+        <td><b>Alex Todd #9</b> <span style="font-size:8px; font-weight:400;">(just pitched)</span></td>
+        <td><b>Blake Lasita #10</b> <span style="font-size:8px; font-weight:400;">(just pitched)</span></td>
+        <td><b>Charlie Ruther #15</b> <span style="font-size:8px; font-weight:400;">(resting)</span></td>
+        <td><b>Mason Floyd #11</b> <span style="font-size:8px; font-weight:400;">(just pitched)</span></td>
+        <td><b>Grayson Neville #1</b> <span style="font-size:8px; font-weight:400;">(just pitched)</span></td>
+      </tr>
+      <tr class="brow2">
+        <td class="pl"></td>
+        <td><b>Porter Mills #6</b> <span style="font-size:8px;">(resting — ace, pitched G1)</span></td>
+        <td><b>Blake Fristoe #19</b> <span style="font-size:8px;">(resting — pitched G1)</span></td>
+        <td><b>Owen Niemer #17</b> <span style="font-size:8px;">(resting — pitched G1)</span></td>
+        <td><b>Crew Powers #2</b> <span style="font-size:8px;">(just pitched)</span></td>
+        <td><b>Lukas Adams #3</b> <span style="font-size:8px;">(resting — pitched G1)</span></td>
+        <td><b>Porter Mills #6</b> <span style="font-size:8px;">(2nd sit — inn 1+6, not consecutive ✓)</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="notes-row">
+    <div class="nb" style="flex:2.5;"><div class="nbh">Notes — Game 2</div>
+    <div class="nbb">Zach+Porter both rest inn 1 (both pitched G1, protect for tomorrow) · Inn 4: Grayson catches (C listed) since Charlie rests · Inn 5 pitcher is flagged — Grayson is "practice only" per his profile; your call whether to use him or repeat one of the other arms</div></div>
+    <div class="nb" style="flex:1;"><div class="nbh">Pitch Counts</div><div class="nbb"></div></div>
+    <div class="nb" style="flex:0.8;"><div class="nbh">Score</div><div class="nbb"></div></div>
+  </div>
+</div>
+
+</body>
+</html>

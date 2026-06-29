@@ -1,4 +1,4 @@
-# Season Analytics Dashboard — Jaegers 9U Spring 2026
+# Season Analytics Dashboard — Yeager 9U Spring 2026
 
 > Key metrics and trends, updated after each game. Use alongside COACHING-HQ.md for a full picture.
 

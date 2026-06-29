@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Yeager 9U Lineup</title>
+<style>
+  :root{--navy:#10243f;--gold:#caa53d;--red:#c0392b;--green:#1d7a44;--line:#d7dde5;
+    --bg:#eef2f6;--card:#fff;--ink:#14202e;--mute:#5a6b7e;--shade:#eef1f5;}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  .wrap{max-width:600px;margin:0 auto;padding:12px 12px 40px}
+  header{background:var(--navy);color:#fff;border-radius:14px;padding:11px 14px}
+  header h1{margin:0;font-size:16px;font-weight:700}
+  .gamebar{display:flex;gap:6px;margin:10px 0 4px}
+  .gamebar button{flex:1;padding:11px 0;border:1px solid var(--line);background:var(--card);
+    border-radius:11px;font-size:14px;font-weight:700;color:var(--navy)}
+  .gamebar button.on{background:var(--gold);color:#1d2a16;border-color:var(--gold)}
+  h2{font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--mute);margin:16px 4px 7px}
+  .innbar{display:flex;gap:6px;margin:10px 0}
+  .innbar button{flex:1;padding:11px 0;border:1px solid var(--line);background:var(--card);
+    border-radius:10px;font-size:15px;font-weight:700;color:var(--navy)}
+  .innbar button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .innbar button.dup{box-shadow:inset 0 0 0 2px var(--red)}
+  .colhdr{display:flex;align-items:center;gap:8px;padding:0 11px 5px;font-size:11px;
+    text-transform:uppercase;letter-spacing:.4px;color:var(--mute);font-weight:700}
+  .colhdr .h-pos{width:34px}
+  .colhdr .h-prev{width:92px}
+  .colhdr .h-now{flex:1}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .row{display:flex;align-items:center;gap:8px;padding:6px 11px;border-bottom:1px solid var(--line)}
+  .row:last-child{border-bottom:none}
+  .row.pitch{background:#fff5f5}
+  .pos{width:34px;font-weight:800;color:var(--navy);font-size:15px}
+  .row.pitch .pos{color:var(--red)}
+  .prev{width:92px;font-size:13px;font-weight:600;color:var(--mute);background:var(--shade);
+    border:1px solid var(--line);border-radius:8px;padding:8px 7px;text-align:center;white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis}
+  .prev.same{color:var(--green)}
+  select{flex:1;font-size:16px;padding:10px;border:1px solid var(--line);border-radius:9px;
+    background:#fff;color:var(--ink);appearance:none;-webkit-appearance:none;font-weight:600;min-width:0}
+  select.bad{border-color:var(--red);background:#fdecec;color:var(--red)}
+  .warn{margin:9px 2px 0;padding:9px 12px;background:#fdecec;border:1px solid #f3b6b0;
+    border-radius:10px;color:var(--red);font-size:13px;font-weight:600;display:none}
+  .warn.show{display:block}
+  .benchwrap{display:flex;gap:8px;margin-top:10px}
+  .bcard{flex:1;padding:10px 12px;border-radius:12px;border:1px solid var(--line)}
+  .bcard.now{background:#f4f7fa}
+  .bcard.prev{background:var(--shade)}
+  .bcard .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--mute);font-weight:700}
+  .bcard .names{margin-top:4px;font-size:14px;font-weight:700;color:var(--ink)}
+  .bcard.prev .names{color:var(--mute)}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:5px 10px;font-size:13px}
+  .chip .ip{color:var(--navy);font-weight:800}
+  .chip .pi{color:var(--red);font-weight:800;font-size:12px}
+  .chip.lo{opacity:.5}
+  .ov{border:1px solid var(--line);border-radius:12px;overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:12px;background:var(--card)}
+  th,td{padding:5px 4px;text-align:center;border-bottom:1px solid var(--line)}
+  th{background:#eef2f7;color:var(--navy);font-weight:700}
+  td.p,th.p{text-align:left;font-weight:800;color:var(--navy);padding-left:8px;background:#fafbfd;white-space:nowrap}
+  tr.pr td{background:#fff5f5;color:var(--red);font-weight:700}
+  td.d{color:var(--red);font-weight:800}
+  td.cur{box-shadow:inset 0 0 0 2px var(--gold)}
+  .actions{display:flex;gap:8px;margin-top:14px}
+  .actions button{flex:1;padding:11px;border:1px solid var(--line);background:var(--card);
+    border-radius:10px;font-size:14px;font-weight:700;color:var(--navy)}
+  .foot{margin-top:16px;font-size:11px;color:var(--mute);text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><h1>Yeager 9U — Lineup Board</h1></header>
+  <div class="gamebar" id="gamebar"></div>
+  <div class="innbar" id="innbar"></div>
+
+  <div class="colhdr"><span class="h-pos"></span><span class="h-prev" id="hprev">Last</span><span class="h-now" id="hnow">This inning</span></div>
+  <div class="card" id="poslist"></div>
+  <div class="warn" id="warn"></div>
+  <div class="benchwrap">
+    <div class="bcard prev"><div class="lbl" id="pbench-lbl">Bench last inning</div><div class="names" id="pbench"></div></div>
+    <div class="bcard now"><div class="lbl">Bench this inning</div><div class="names" id="bench"></div></div>
+  </div>
+
+  <h2>Innings played <span style="text-transform:none;font-weight:600">(field / <span style="color:var(--red)">P</span> = pitched)</span></h2>
+  <div class="chips" id="chips"></div>
+
+  <h2>All innings at a glance</h2>
+  <div class="ov"><table id="ovtable"></table></div>
+
+  <div class="actions">
+    <button id="reset">Reset to game plan</button>
+    <button id="clearinn">Clear this inning</button>
+  </div>
+  <div class="foot">Add to Home Screen for one-tap access · works offline · saves as you go</div>
+</div>
+
+<script>
+(function(){
+  var POS=["P","C","1B","2B","3B","SS","LF","CF","RF"];
+  var PLAYERS=["Martini","Powers","Grayson","Ruther","Adams","Lasita","Sander","Mills","Todd","Floyd","Niemer","Fristoe"];
+  var PRESETS={
+    semi:{name:"Semifinal",grid:[
+      {P:"Mills",C:"Ruther","1B":"Adams","2B":"Grayson","3B":"Lasita",SS:"Martini",LF:"Niemer",CF:"Powers",RF:"Floyd"},
+      {P:"Mills",C:"Martini","1B":"Adams","2B":"Sander","3B":"Todd",SS:"Powers",LF:"Niemer",CF:"Grayson",RF:"Fristoe"},
+      {P:"Mills",C:"Ruther","1B":"Adams","2B":"Floyd","3B":"Lasita",SS:"Martini",LF:"Sander",CF:"Powers",RF:"Fristoe"},
+      {P:"Floyd",C:"Ruther","1B":"Adams","2B":"Grayson","3B":"Lasita",SS:"Martini",LF:"Todd",CF:"Powers",RF:"Niemer"},
+      {P:"Powers",C:"Ruther","1B":"Mills","2B":"Sander","3B":"Todd",SS:"Martini",LF:"Fristoe",CF:"Grayson",RF:"Niemer"},
+      {P:"Powers",C:"Ruther","1B":"Adams","2B":"Sander","3B":"Lasita",SS:"Martini",LF:"Grayson",CF:"Todd",RF:"Floyd"}
+    ]},
+    champ:{name:"Championship",grid:[
+      {P:"Martini",C:"Ruther","1B":"Mills","2B":"Grayson","3B":"Lasita",SS:"Powers",LF:"Fristoe",CF:"Todd",RF:"Niemer"},
+      {P:"Martini",C:"Ruther","1B":"Adams","2B":"Floyd","3B":"Lasita",SS:"Grayson",LF:"Powers",CF:"Todd",RF:"Sander"},
+      {P:"Ruther",C:"Martini","1B":"Mills","2B":"Sander","3B":"Lasita",SS:"Powers",LF:"Fristoe",CF:"Grayson",RF:"Niemer"},
+      {P:"Ruther",C:"Martini","1B":"Adams","2B":"Grayson","3B":"Lasita",SS:"Powers",LF:"Fristoe",CF:"Todd",RF:"Floyd"},
+      {P:"Mills",C:"Martini","1B":"Adams","2B":"Sander","3B":"Todd",SS:"Powers",LF:"Niemer",CF:"Grayson",RF:"Fristoe"},
+      {P:"Mills",C:"Ruther","1B":"Adams","2B":"Grayson","3B":"Lasita",SS:"Martini",LF:"Niemer",CF:"Powers",RF:"Floyd"}
+    ]}
+  };
+  var game="semi", cur=0, grid;
+  function key(g){return "yeager9u_"+g+"_v2";}
+  function loadGame(g){try{var s=localStorage.getItem(key(g));if(s)return JSON.parse(s);}catch(e){}return JSON.parse(JSON.stringify(PRESETS[g].grid));}
+  function save(){try{localStorage.setItem(key(game),JSON.stringify(grid));}catch(e){}}
+  grid=loadGame(game);
+
+  function dupsIn(i){var seen={},d={};POS.forEach(function(ps){var pl=grid[i][ps];if(!pl)return;if(seen[pl])d[pl]=1;seen[pl]=1;});return d;}
+  function benchOf(i){var u={};POS.forEach(function(ps){if(grid[i][ps])u[grid[i][ps]]=1;});return PLAYERS.filter(function(p){return !u[p]});}
+
+  function renderGames(){
+    var b=document.getElementById("gamebar");b.innerHTML="";
+    ["semi","champ"].forEach(function(g){
+      var btn=document.createElement("button");btn.textContent=PRESETS[g].name;
+      if(g===game)btn.className="on";
+      btn.onclick=function(){save();game=g;grid=loadGame(g);cur=0;renderAll();};
+      b.appendChild(btn);
+    });
+  }
+  function renderBar(){
+    var b=document.getElementById("innbar");b.innerHTML="";
+    for(var i=0;i<6;i++){(function(i){
+      var btn=document.createElement("button");btn.textContent=i+1;
+      btn.className=(i===cur?"on":"")+(Object.keys(dupsIn(i)).length?" dup":"");
+      btn.onclick=function(){cur=i;renderAll();};
+      b.appendChild(btn);
+    })(i);}
+  }
+  function renderPos(){
+    var c=document.getElementById("poslist");c.innerHTML="";
+    var d=dupsIn(cur);
+    var prevI=cur-1;
+    document.getElementById("hprev").textContent=cur>0?("Inn "+cur):"Start";
+    document.getElementById("hnow").textContent="Inn "+(cur+1);
+    POS.forEach(function(ps){
+      var row=document.createElement("div");row.className="row"+(ps==="P"?" pitch":"");
+      var lab=document.createElement("div");lab.className="pos";lab.textContent=ps;row.appendChild(lab);
+      var prev=document.createElement("div");prev.className="prev";
+      var pv=cur>0?(grid[prevI][ps]||"—"):"—";
+      prev.textContent=pv;
+      if(cur>0&&grid[prevI][ps]&&grid[prevI][ps]===grid[cur][ps])prev.className="prev same";
+      row.appendChild(prev);
+      var sel=document.createElement("select");
+      var o0=document.createElement("option");o0.value="";o0.textContent="—";sel.appendChild(o0);
+      PLAYERS.forEach(function(pl){var o=document.createElement("option");o.value=pl;o.textContent=pl;
+        if(grid[cur][ps]===pl)o.selected=true;sel.appendChild(o);});
+      if(grid[cur][ps]&&d[grid[cur][ps]])sel.className="bad";
+      sel.onchange=function(){grid[cur][ps]=sel.value;save();renderAll();};
+      row.appendChild(sel);c.appendChild(row);
+    });
+    var dn=Object.keys(d),w=document.getElementById("warn");
+    if(dn.length){w.className="warn show";w.textContent="⚠ "+dn.join(", ")+" is listed in two spots this inning.";}
+    else w.className="warn";
+  }
+  function renderBench(){
+    document.getElementById("bench").textContent=benchOf(cur).join(",  ")||"Nobody — full field";
+    var pl=document.getElementById("pbench"),lb=document.getElementById("pbench-lbl");
+    if(cur>0){lb.textContent="Bench in Inn "+cur;pl.textContent=benchOf(cur-1).join(",  ")||"Nobody";}
+    else{lb.textContent="Bench last inning";pl.textContent="—";}
+  }
+  function renderChips(){
+    var c=document.getElementById("chips");c.innerHTML="";
+    var f={},pi={};PLAYERS.forEach(function(p){f[p]=0;pi[p]=0;});
+    for(var i=0;i<6;i++)POS.forEach(function(ps){var pl=grid[i][ps];if(pl){f[pl]++;if(ps==="P")pi[pl]++;}});
+    PLAYERS.slice().sort(function(a,b){return f[b]-f[a]}).forEach(function(p){
+      var ch=document.createElement("div");ch.className="chip"+(f[p]<=3?" lo":"");
+      ch.innerHTML="<b>"+p+"</b> <span class='ip'>"+f[p]+"</span>"+(pi[p]?" <span class='pi'>"+pi[p]+"P</span>":"");
+      c.appendChild(ch);
+    });
+  }
+  function renderOverview(){
+    var t=document.getElementById("ovtable");var h="<tr><th class='p'>Pos</th>";
+    for(var i=0;i<6;i++)h+="<th>"+(i+1)+"</th>";h+="</tr>";
+    POS.forEach(function(ps){
+      h+="<tr"+(ps==="P"?" class='pr'":"")+"><td class='p'>"+ps+"</td>";
+      for(var i=0;i<6;i++){var pl=grid[i][ps];var bad=pl&&dupsIn(i)[pl];
+        h+="<td class='"+(bad?"d ":"")+(i===cur?"cur":"")+"'>"+(pl||"—")+"</td>";}
+      h+="</tr>";
+    });
+    h+="<tr><td class='p'>Bench</td>";
+    for(var i=0;i<6;i++)h+="<td style='font-size:11px;color:#5a6b7e' class='"+(i===cur?"cur":"")+"'>"+benchOf(i).join("<br>")+"</td>";
+    h+="</tr>";
+    t.innerHTML=h;
+  }
+  function renderAll(){renderGames();renderBar();renderPos();renderBench();renderChips();renderOverview();}
+  document.getElementById("reset").onclick=function(){if(confirm("Reset "+PRESETS[game].name+" to the saved game plan?")){grid=JSON.parse(JSON.stringify(PRESETS[game].grid));save();renderAll();}};
+  document.getElementById("clearinn").onclick=function(){POS.forEach(function(ps){grid[cur][ps]="";});save();renderAll();};
+  renderAll();
+})();
+</script>
+</body>
+</html>

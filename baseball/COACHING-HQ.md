@@ -1,4 +1,4 @@
-# Jaegers 9U — Coaching HQ
+# Yeager 9U — Coaching HQ
 
 > Rob's command center for the 2026 spring season. Combines Plaud game recordings, GameChanger stats, and coaching observations into one system.
 

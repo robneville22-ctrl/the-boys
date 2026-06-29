@@ -1,4 +1,4 @@
-# Jaegers 9U — Drill Library & Practice Reference
+# Yeager 9U — Drill Library & Practice Reference
 
 > Curated drills for competitive 9U travel baseball. Organized by category. Each drill includes time, equipment, and which players to focus on based on current team needs.
 

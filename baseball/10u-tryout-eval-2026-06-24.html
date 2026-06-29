@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yeager 10U Tryout Evaluations — New Players</title>
+<style>
+  :root { --line:#cbd5e1; --ink:#0f172a; --accent:#1e3a8a; --muted:#64748b; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+         margin:0; padding:14px; color:var(--ink); background:#fff; }
+  header { display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:8px; margin-bottom:8px; }
+  h1 { font-size:18px; margin:0; color:var(--accent); }
+  .sub { font-size:12px; color:var(--muted); }
+  .legend { font-size:11px; color:var(--muted); margin:4px 0 10px; line-height:1.5; }
+  .legend b { color:var(--ink); }
+  table { width:100%; border-collapse:collapse; font-size:12px; }
+  th, td { border:1px solid var(--line); padding:5px 4px; text-align:center; }
+  th { background:var(--accent); color:#fff; font-size:10px; text-transform:uppercase; letter-spacing:.3px; }
+  td.name { text-align:left; font-weight:600; white-space:nowrap; }
+  td.pos { font-size:10px; color:var(--muted); white-space:nowrap; }
+  td.num, td.score, td.tier { cursor:pointer; min-width:30px; font-weight:700; font-size:14px; }
+  td.notes { text-align:left; min-width:120px; }
+  tbody tr:nth-child(even) { background:#f8fafc; }
+  .score.s1,.score.s2 { color:#b91c1c; } .score.s3 { color:#b45309; }
+  .score.s4,.score.s5 { color:#15803d; }
+  .tier.D { color:#15803d; } .tier.M { color:#b45309; } .tier.N { color:#b91c1c; }
+  .hint { font-size:11px; color:var(--muted); margin-top:10px; }
+  @media print {
+    .hint, .tapnote { display:none; }
+    body { padding:0; }
+    @page { size:landscape; margin:10mm; }
+    th { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Yeager 10U Tryouts — New Player Evaluations</h1>
+    <div class="sub">Wed Jun 24, 2026 · Bridgetown Middle School · 20 new players (returners excluded)</div>
+  </div>
+  <div class="sub">Coach Neville</div>
+</header>
+<div class="legend">
+  <b>Score 1–5</b> (1 poor · 3 average · 5 excellent) for the things you can't coach.
+  &nbsp;|&nbsp; <b>Tier:</b> D = Definite · M = Maybe · N = No.
+  &nbsp;|&nbsp; Write each kid's pinnie <b>#</b> as you assign it. <span class="tapnote">On phone: tap a cell to cycle the value. Printing + pen is the safe bet.</span>
+</div>
+
+<table id="grid">
+<thead>
+  <tr>
+    <th>#</th><th>Player</th><th>Pos</th>
+    <th>Arm</th><th>Field</th><th>Hit</th><th>Speed</th><th>Coach</th><th>Tier</th><th>Notes</th>
+  </tr>
+</thead>
+<tbody>
+  <!-- rows injected -->
+</tbody>
+</table>
+
+<p class="hint">Tip: score each kid right after their station while it's fresh, and lock a tier the moment they finish. Do a quick ranking pass before you leave the field.</p>
+
+<script>
+  const players = [
+    ["Berndsen, Hunter","C/UT"],
+    ["Brown, Colin","C/OF/3B"],
+    ["Buckley, Max","P/SS/UT"],
+    ["Christopfel, Jack","P/1B/3B/C"],
+    ["Combs, Blake","SS/P/C"],
+    ["Erdman, Eli","P/OF/C/SS"],
+    ["Frey, Ethan","P/3B/SS/OF"],
+    ["Galante, Giovanni","C/3B"],
+    ["Goff, Carter","C/3B/OF"],
+    ["Hollingsworth, Andrew","P/C/OF/2B"],
+    ["Hyland, Jonathan","P/C/OF/2B"],
+    ["Kist, Nolan","P/2B/SS"],
+    ["Lanser, Abe","OF/2B/C"],
+    ["Muckley, Mitchell","P/C/1B"],
+    ["Mull, Titus","P/SS"],
+    ["Peters, Dominic","P/1B/OF"],
+    ["Rudisell, Cameron","P/1B"],
+    ["Sowder, Cayne","P/UT"],
+    ["Steinnagel, Theo","P/UT"],
+    ["Taul, Gerrico","P/C/3B"]
+  ];
+  const tb = document.querySelector('#grid tbody');
+  players.forEach(([name,pos]) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td class="num"></td>' +
+      '<td class="name">'+name+'</td>' +
+      '<td class="pos">'+pos+'</td>' +
+      '<td class="score"></td><td class="score"></td><td class="score"></td><td class="score"></td><td class="score"></td>' +
+      '<td class="tier"></td>' +
+      '<td class="notes"></td>';
+    tb.appendChild(tr);
+  });
+
+  // tap-to-cycle scoring (in-session only)
+  const scoreSeq = ['','1','2','3','4','5'];
+  const tierSeq = ['','D','M','N'];
+  document.querySelectorAll('td.score').forEach(c=>{
+    c.addEventListener('click',()=>{
+      let i = scoreSeq.indexOf(c.textContent.trim()); i=(i+1)%scoreSeq.length;
+      const v = scoreSeq[i]; c.textContent=v;
+      c.className='score'+(v?' s'+v:'');
+    });
+  });
+  document.querySelectorAll('td.tier').forEach(c=>{
+    c.addEventListener('click',()=>{
+      let i = tierSeq.indexOf(c.textContent.trim()); i=(i+1)%tierSeq.length;
+      const v = tierSeq[i]; c.textContent=v; c.className='tier'+(v?' '+v:'');
+    });
+  });
+  // tap # cell to type a number on phone
+  document.querySelectorAll('td.num, td.notes').forEach(c=>{
+    c.setAttribute('contenteditable','true');
+  });
+</script>
+</body>
+</html>
